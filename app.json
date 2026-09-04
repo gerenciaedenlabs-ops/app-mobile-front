@@ -4,9 +4,29 @@
     "slug": "edenship",
     "version": "0.1.0",
     "orientation": "portrait",
+    "scheme": "edenship",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.edenlabs.edenship"
+    },
+    "android": {
+      "package": "com.edenlabs.edenship",
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "EdenShip usa el micrófono para escuchar tu guitarra y darte feedback en tiempo real."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }

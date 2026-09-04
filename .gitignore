@@ -1,2 +1,21 @@
 node_modules/
 .expo/
+dist/
+web-build/
+
+# Builds nativos generados (usa dev builds vía EAS o `expo prebuild`)
+ios/
+android/
+
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+.DS_Store
+*.tsbuildinfo
+expo-env.d.ts
+
+.env
+.env.local
+.claude/settings.json

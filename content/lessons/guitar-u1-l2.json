@@ -1,0 +1,57 @@
+{
+  "id": "guitar-u1-l2",
+  "unitId": "guitar-u1",
+  "title": "Tu primer acorde: Mi menor",
+  "order": 2,
+  "xpReward": 30,
+  "exerciseTypes": ["multiple_choice", "guitar_detection"],
+  "requiresMicrophone": true,
+  "isPremium": false,
+  "exercises": [
+    {
+      "id": "guitar-u1-l2-e1",
+      "type": "multiple_choice",
+      "prompt": "Para tocar Mi menor (Em), ¿dónde van los dedos?",
+      "choices": [
+        { "id": "correct", "label": "2º traste en la 5ª y la 4ª cuerda", "sublabel": "El resto al aire" },
+        { "id": "wrong-1", "label": "1er traste en la 3ª y la 2ª cuerda" },
+        { "id": "wrong-2", "label": "3er traste en la 6ª y la 1ª cuerda" },
+        { "id": "wrong-3", "label": "2º traste en la 1ª y la 2ª cuerda" }
+      ],
+      "correctChoiceId": "correct",
+      "explanation": "Em usa solo dos dedos: 2º traste en la 5ª (La) y en la 4ª (Re). Las otras cuatro cuerdas suenan al aire."
+    },
+    {
+      "id": "guitar-u1-l2-e2",
+      "type": "guitar_detection",
+      "prompt": "Toca la 6ª cuerda al aire y mantenla sonando.",
+      "hint": "Es la cuerda más gruesa. No pises ningún traste.",
+      "target": {
+        "kind": "note",
+        "name": "E",
+        "octave": 2,
+        "frequencyHz": 82.41,
+        "string": 6,
+        "fret": 0
+      },
+      "holdMs": 1200,
+      "centsTolerance": 25,
+      "timeoutMs": 25000
+    },
+    {
+      "id": "guitar-u1-l2-e3",
+      "type": "guitar_detection",
+      "prompt": "Ahora forma Mi menor y rasguea el acorde completo.",
+      "hint": "2º traste en la 5ª y la 4ª cuerda; las demás al aire.",
+      "target": {
+        "kind": "chord",
+        "name": "Em",
+        "notes": ["E", "B", "E", "G", "B", "E"],
+        "diagram": [0, 2, 2, 0, 0, 0]
+      },
+      "holdMs": 1500,
+      "centsTolerance": 30,
+      "timeoutMs": 30000
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "id": "drums-u1-l1",
+  "unitId": "drums-u1",
+  "title": "Sentir el pulso",
+  "order": 1,
+  "xpReward": 20,
+  "exerciseTypes": ["multiple_choice", "rhythm_tap"],
+  "requiresMicrophone": false,
+  "isPremium": false,
+  "exercises": [
+    {
+      "id": "drums-u1-l1-e1",
+      "type": "multiple_choice",
+      "prompt": "¿Qué mide el BPM?",
+      "choices": [
+        { "id": "beats", "label": "Pulsos por minuto" },
+        { "id": "bars", "label": "Compases por minuto" },
+        { "id": "notes", "label": "Notas por compás" },
+        { "id": "volume", "label": "Volumen de la batería" }
+      ],
+      "correctChoiceId": "beats",
+      "explanation": "BPM = beats per minute. A 60 BPM cae un pulso por segundo."
+    },
+    {
+      "id": "drums-u1-l1-e2",
+      "type": "rhythm_tap",
+      "prompt": "Toca en cada pulso a 100 BPM.",
+      "bpm": 100,
+      "timeSignature": [4, 4],
+      "countInBeats": 4,
+      "pattern": [0, 1, 2, 3],
+      "toleranceMs": 150,
+      "passAccuracy": 0.75
+    }
+  ]
+}
