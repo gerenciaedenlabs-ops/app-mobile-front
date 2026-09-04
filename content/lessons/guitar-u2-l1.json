@@ -1,0 +1,48 @@
+{
+  "id": "guitar-u2-l1",
+  "unitId": "guitar-u2",
+  "title": "Rasgueo en negras",
+  "order": 1,
+  "xpReward": 35,
+  "exerciseTypes": ["multiple_choice", "rhythm_tap"],
+  "requiresMicrophone": false,
+  "isPremium": true,
+  "exercises": [
+    {
+      "id": "guitar-u2-l1-e1",
+      "type": "multiple_choice",
+      "prompt": "En un compás de 4/4, ¿cuántas negras entran?",
+      "choices": [
+        { "id": "two", "label": "2" },
+        { "id": "three", "label": "3" },
+        { "id": "four", "label": "4" },
+        { "id": "eight", "label": "8" }
+      ],
+      "correctChoiceId": "four",
+      "explanation": "El 4 de abajo dice que el pulso es una negra; el 4 de arriba, que hay cuatro por compás."
+    },
+    {
+      "id": "guitar-u2-l1-e2",
+      "type": "rhythm_tap",
+      "prompt": "Toca en cada pulso: un rasgueo por negra.",
+      "bpm": 90,
+      "timeSignature": [4, 4],
+      "countInBeats": 4,
+      "pattern": [0, 1, 2, 3],
+      "toleranceMs": 160,
+      "passAccuracy": 0.7
+    },
+    {
+      "id": "guitar-u2-l1-e3",
+      "type": "rhythm_tap",
+      "prompt": "Ahora en corcheas: el doble de rápido, mismo pulso.",
+      "hint": "Cuenta 1 y 2 y 3 y 4 y.",
+      "bpm": 90,
+      "timeSignature": [4, 4],
+      "countInBeats": 4,
+      "pattern": [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5],
+      "toleranceMs": 140,
+      "passAccuracy": 0.7
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "id": "piano-u1-l1",
+  "unitId": "piano-u1",
+  "title": "El Do central y las teclas negras",
+  "order": 1,
+  "xpReward": 20,
+  "exerciseTypes": ["multiple_choice", "listen_and_choose", "rhythm_tap"],
+  "requiresMicrophone": false,
+  "isPremium": false,
+  "exercises": [
+    {
+      "id": "piano-u1-l1-e1",
+      "type": "multiple_choice",
+      "prompt": "Las teclas negras del piano se repiten en grupos de...",
+      "choices": [
+        { "id": "two-three", "label": "2 y 3" },
+        { "id": "three-four", "label": "3 y 4" },
+        { "id": "two-two", "label": "2 y 2" },
+        { "id": "one-two", "label": "1 y 2" }
+      ],
+      "correctChoiceId": "two-three",
+      "explanation": "Ese patrón de 2 y 3 es el mapa del teclado: te dice dónde estás sin contar desde el principio."
+    },
+    {
+      "id": "piano-u1-l1-e2",
+      "type": "multiple_choice",
+      "prompt": "¿Dónde está el Do?",
+      "hint": "Usa el grupo de 2 negras como referencia.",
+      "choices": [
+        { "id": "left-of-two", "label": "La tecla blanca justo a la izquierda del grupo de 2 negras" },
+        { "id": "right-of-two", "label": "La tecla blanca justo a la derecha del grupo de 2 negras" },
+        { "id": "left-of-three", "label": "La tecla blanca justo a la izquierda del grupo de 3 negras" },
+        { "id": "between-three", "label": "Entre las dos primeras negras del grupo de 3" }
+      ],
+      "correctChoiceId": "left-of-two",
+      "explanation": "Do siempre queda pegado a la izquierda del grupo de 2 negras. El Do central es el que cae cerca del centro del teclado."
+    },
+    {
+      "id": "piano-u1-l1-e3",
+      "type": "listen_and_choose",
+      "prompt": "Escucha la nota. ¿Cuál es?",
+      "audioKey": "piano-c4",
+      "autoPlay": true,
+      "maxReplays": null,
+      "choices": [
+        { "id": "c4", "label": "Do central", "sublabel": "C4 · 261.63 Hz" },
+        { "id": "g4", "label": "Sol", "sublabel": "G4 · 392 Hz" }
+      ],
+      "correctChoiceId": "c4",
+      "explanation": "Es el Do central (C4). El Sol de arriba suena claramente más agudo."
+    },
+    {
+      "id": "piano-u1-l1-e4",
+      "type": "rhythm_tap",
+      "prompt": "Toca una vez por pulso, a 80 BPM.",
+      "bpm": 80,
+      "timeSignature": [4, 4],
+      "countInBeats": 4,
+      "pattern": [0, 1, 2, 3],
+      "toleranceMs": 180,
+      "passAccuracy": 0.7
+    }
+  ]
+}

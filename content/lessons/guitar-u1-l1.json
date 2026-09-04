@@ -1,0 +1,55 @@
+{
+  "id": "guitar-u1-l1",
+  "unitId": "guitar-u1",
+  "title": "Las cuerdas al aire",
+  "order": 1,
+  "xpReward": 20,
+  "exerciseTypes": ["multiple_choice", "listen_and_choose"],
+  "requiresMicrophone": false,
+  "isPremium": false,
+  "exercises": [
+    {
+      "id": "guitar-u1-l1-e1",
+      "type": "multiple_choice",
+      "prompt": "¿Qué nota da la 6ª cuerda al aire, la más gruesa?",
+      "choices": [
+        { "id": "e", "label": "Mi", "sublabel": "E" },
+        { "id": "a", "label": "La", "sublabel": "A" },
+        { "id": "d", "label": "Re", "sublabel": "D" },
+        { "id": "g", "label": "Sol", "sublabel": "G" }
+      ],
+      "correctChoiceId": "e",
+      "explanation": "La 6ª cuerda al aire es un Mi grave (E2, 82.41 Hz). La 1ª cuerda también es un Mi, pero dos octavas más agudo."
+    },
+    {
+      "id": "guitar-u1-l1-e2",
+      "type": "listen_and_choose",
+      "prompt": "Escucha. ¿Qué cuerda al aire está sonando?",
+      "audioKey": "guitar-open-a2",
+      "autoPlay": true,
+      "maxReplays": 3,
+      "choices": [
+        { "id": "s6", "label": "6ª cuerda", "sublabel": "Mi grave" },
+        { "id": "s5", "label": "5ª cuerda", "sublabel": "La" },
+        { "id": "s4", "label": "4ª cuerda", "sublabel": "Re" },
+        { "id": "s3", "label": "3ª cuerda", "sublabel": "Sol" }
+      ],
+      "correctChoiceId": "s5",
+      "explanation": "Es un La (A2, 110 Hz), la 5ª cuerda al aire."
+    },
+    {
+      "id": "guitar-u1-l1-e3",
+      "type": "multiple_choice",
+      "prompt": "De la 6ª a la 1ª cuerda, ¿cuál es la afinación estándar?",
+      "hint": "Empieza por la cuerda más grave.",
+      "choices": [
+        { "id": "eadgbe", "label": "Mi La Re Sol Si Mi", "sublabel": "E A D G B E" },
+        { "id": "ebgdae", "label": "Mi Si Sol Re La Mi", "sublabel": "E B G D A E" },
+        { "id": "eadgce", "label": "Mi La Re Sol Do Mi", "sublabel": "E A D G C E" },
+        { "id": "dadgbe", "label": "Re La Re Sol Si Mi", "sublabel": "D A D G B E" }
+      ],
+      "correctChoiceId": "eadgbe",
+      "explanation": "E A D G B E. El salto entre la 3ª y la 2ª cuerda es de una tercera mayor; el resto son cuartas justas."
+    }
+  ]
+}
