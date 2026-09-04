@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "EdenShip",
+    "slug": "edenship",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true
+    }
+  }
+}
