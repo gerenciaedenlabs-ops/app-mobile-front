@@ -1,0 +1,30 @@
+[
+  {
+    "id": "guitar",
+    "name": "Guitarra",
+    "icon": "🎸",
+    "accentColor": "#F97316",
+    "tagline": "Acordes, cuerdas al aire y rasgueo"
+  },
+  {
+    "id": "piano",
+    "name": "Piano",
+    "icon": "🎹",
+    "accentColor": "#6D28D9",
+    "tagline": "El teclado, las notas y la lectura"
+  },
+  {
+    "id": "drums",
+    "name": "Batería",
+    "icon": "🥁",
+    "accentColor": "#DC2626",
+    "tagline": "Pulso, subdivisión y grooves"
+  },
+  {
+    "id": "voice",
+    "name": "Voz",
+    "icon": "🎤",
+    "accentColor": "#0891B2",
+    "tagline": "Afinación, respiración y registro"
+  }
+]

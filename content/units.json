@@ -1,0 +1,30 @@
+[
+  {
+    "id": "guitar-u1",
+    "instrumentId": "guitar",
+    "title": "Primeros pasos",
+    "order": 1,
+    "lessonIds": ["guitar-u1-l1", "guitar-u1-l2"]
+  },
+  {
+    "id": "guitar-u2",
+    "instrumentId": "guitar",
+    "title": "Rasgueo y ritmo",
+    "order": 2,
+    "lessonIds": ["guitar-u2-l1"]
+  },
+  {
+    "id": "piano-u1",
+    "instrumentId": "piano",
+    "title": "El teclado",
+    "order": 1,
+    "lessonIds": ["piano-u1-l1"]
+  },
+  {
+    "id": "drums-u1",
+    "instrumentId": "drums",
+    "title": "El pulso",
+    "order": 1,
+    "lessonIds": ["drums-u1-l1"]
+  }
+]
