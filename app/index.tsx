@@ -26,6 +26,10 @@ export default function InstrumentSelectorScreen() {
 
   const openInstrument = (instrumentId: InstrumentId) => {
     setLastInstrument(instrumentId);
+    if (instrumentId === 'voice') {
+      router.push('/voice-pitch-test');
+      return;
+    }
     router.push(`/learn/${instrumentId}`);
   };
 
@@ -68,6 +72,7 @@ export default function InstrumentSelectorScreen() {
                   instrument={instrument}
                   completedLessons={countCompleted(curriculum, completed)}
                   totalLessons={total}
+                  previewAvailable={instrument.id === 'voice'}
                   onPress={() => openInstrument(instrument.id)}
                 />
               );

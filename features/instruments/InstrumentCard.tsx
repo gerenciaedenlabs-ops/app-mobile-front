@@ -7,6 +7,7 @@ interface InstrumentCardProps {
   instrument: Instrument;
   completedLessons: number;
   totalLessons: number;
+  previewAvailable?: boolean;
   onPress: () => void;
 }
 
@@ -14,6 +15,7 @@ export function InstrumentCard({
   instrument,
   completedLessons,
   totalLessons,
+  previewAvailable = false,
   onPress,
 }: InstrumentCardProps) {
   const hasContent = totalLessons > 0;
@@ -23,7 +25,11 @@ export function InstrumentCard({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={`${instrument.name}. ${instrument.tagline}. ${
-        hasContent ? `${completedLessons} de ${totalLessons} lecciones` : 'Próximamente'
+        hasContent
+          ? `${completedLessons} de ${totalLessons} lecciones`
+          : previewAvailable
+            ? 'Prueba de afinación disponible'
+            : 'Próximamente'
       }`}
       onPress={onPress}
       className="flex-1 rounded-2xl border-2 border-slate-200 bg-white p-4 active:bg-surface-sunken"
@@ -53,6 +59,10 @@ export function InstrumentCard({
               {completedLessons}/{totalLessons} lecciones
             </Text>
           </>
+        ) : previewAvailable ? (
+          <Text className="text-[11px] font-extrabold uppercase tracking-wide text-cyan-700">
+            Prueba disponible
+          </Text>
         ) : (
           <Text className="text-[11px] font-semibold uppercase tracking-wide text-ink-muted">
             Próximamente

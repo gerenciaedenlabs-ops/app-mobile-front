@@ -21,7 +21,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "EdenShip usa el micrófono para escuchar tu guitarra y darte feedback en tiempo real."
+          "microphonePermission": "EdenShip usa el micrófono para detectar la afinación de tu voz o instrumento y darte feedback en tiempo real."
         }
       ]
     ],
