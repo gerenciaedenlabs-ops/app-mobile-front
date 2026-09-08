@@ -35,6 +35,7 @@ export default function RootLayout() {
             <Stack.Screen name="learn/[instrumentId]" />
             <Stack.Screen name="lesson/[lessonId]" options={{ gestureEnabled: false }} />
             <Stack.Screen name="lesson/result" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="voice-pitch-test" options={{ gestureEnabled: false }} />
             <Stack.Screen name="profile" options={{ presentation: 'modal' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
           </Stack>

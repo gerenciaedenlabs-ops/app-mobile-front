@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  // Evita que NativeWind intente controlar manualmente un esquema ligado a
+  // `media` cuando la hoja CSS se inyecta tarde durante el desarrollo web.
+  darkMode: 'class',
   content: [
     './app/**/*.{js,jsx,ts,tsx}',
     './components/**/*.{js,jsx,ts,tsx}',
