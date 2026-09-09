@@ -10,6 +10,7 @@ export const EXERCISE_TYPES = [
   'listen_and_choose',
   'rhythm_tap',
   'guitar_detection',
+  'voice_pitch',
 ] as const;
 
 export type ExerciseType = (typeof EXERCISE_TYPES)[number];
@@ -101,11 +102,21 @@ export interface GuitarDetectionExercise extends ExerciseBase {
   timeoutMs: number;
 }
 
+export interface VoicePitchExercise extends ExerciseBase {
+  type: 'voice_pitch';
+  target: NoteTarget;
+  /** Milisegundos de voz válida que se recopilan antes de evaluar. */
+  evaluationDurationMs: number;
+  centsTolerance: number;
+  timeoutMs: number;
+}
+
 export type Exercise =
   | MultipleChoiceExercise
   | ListenAndChooseExercise
   | RhythmTapExercise
-  | GuitarDetectionExercise;
+  | GuitarDetectionExercise
+  | VoicePitchExercise;
 
 /** Resultado de un ejercicio resuelto dentro de una sesión. */
 export interface ExerciseResult {

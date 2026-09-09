@@ -26,5 +26,12 @@
     "title": "El pulso",
     "order": 1,
     "lessonIds": ["drums-u1-l1"]
+  },
+  {
+    "id": "voice-u1",
+    "instrumentId": "voice",
+    "title": "Afinación básica",
+    "order": 1,
+    "lessonIds": ["voice-u1-l1"]
   }
 ]

@@ -30,27 +30,38 @@ export interface DetectedPitch {
 
 export interface PitchTargetMatch {
   inTune: boolean;
-  heldMs: number;
+  capturedMs: number;
   progress: number;
-  achieved: boolean;
+  voiceDetected: boolean;
+  completed: boolean;
+}
+
+export interface PitchEvaluation {
+  correct: boolean;
+  frequencyHz: number;
+  cents: number;
+  inTuneRatio: number;
+  sampleCount: number;
 }
 
 export interface UsePitchDetectorOptions {
   target: PitchTarget;
   centsTolerance: number;
-  holdMs: number;
+  /** null mantiene el detector abierto como afinador, sin evaluación final. */
+  evaluationDurationMs: number | null;
   enabled: boolean;
   minFrequencyHz?: number;
   maxFrequencyHz?: number;
   /** Entrega la envolvente del micrófono sin forzar renders de React. */
   onInputLevel?: (level: number) => void;
-  onAchieved?: () => void;
+  onEvaluated?: (evaluation: PitchEvaluation) => void;
 }
 
 export interface PitchDetectorResult {
   status: PitchDetectorStatus;
   pitch: DetectedPitch | null;
   match: PitchTargetMatch;
+  evaluation: PitchEvaluation | null;
   error: string | null;
   restart: () => void;
   stop: () => void;
@@ -62,9 +73,15 @@ const ANALYSIS_WINDOW_SAMPLES = 2048;
 const ANALYSIS_INTERVAL_MS = 95;
 const MINIMUM_DISPLAY_CONFIDENCE = 0.5;
 const MINIMUM_VALIDATION_CONFIDENCE = 0.7;
-const MAX_UNVOICED_GAP_MS = 160;
+const MINIMUM_AUDIBLE_LEVEL = 0.08;
 const MAX_STALE_PITCH_MS = 350;
-const IDLE_MATCH: PitchTargetMatch = { inTune: false, heldMs: 0, progress: 0, achieved: false };
+const IDLE_MATCH: PitchTargetMatch = {
+  inTune: false,
+  capturedMs: 0,
+  progress: 0,
+  voiceDetected: false,
+  completed: false,
+};
 
 interface AppendedSamples {
   samples: Float32Array<ArrayBufferLike>;
@@ -114,46 +131,68 @@ function median(values: readonly number[]): number {
 export function usePitchDetector({
   target,
   centsTolerance,
-  holdMs,
+  evaluationDurationMs,
   enabled,
   minFrequencyHz = 70,
   maxFrequencyHz = 1100,
   onInputLevel,
-  onAchieved,
+  onEvaluated,
 }: UsePitchDetectorOptions): PitchDetectorResult {
   const [status, setStatus] = useState<PitchDetectorStatus>('idle');
   const [pitch, setPitch] = useState<DetectedPitch | null>(null);
   const [match, setMatch] = useState<PitchTargetMatch>(IDLE_MATCH);
+  const [evaluation, setEvaluation] = useState<PitchEvaluation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
 
   const samplesRef = useRef<Float32Array<ArrayBufferLike>>(new Float32Array(0));
+  const pitchSnapshotRef = useRef<DetectedPitch | null>(null);
+  const matchSnapshotRef = useRef<PitchTargetMatch>(IDLE_MATCH);
+  const uiFrameRef = useRef<number | null>(null);
   const recentFrequenciesRef = useRef<number[]>([]);
   const lastAnalysisAtRef = useRef(0);
-  const holdStartedAtRef = useRef<number | null>(null);
-  const lastInTuneAtRef = useRef<number | null>(null);
+  const capturedMsRef = useRef(0);
+  const captureStartedAtRef = useRef<number | null>(null);
+  const evaluationReadingsRef = useRef<{ frequencyHz: number; cents: number; inTune: boolean }[]>([]);
   const lastPitchAtRef = useRef<number | null>(null);
   const pitchVisibleRef = useRef(false);
   const smoothedLevelRef = useRef(0);
-  const achievedRef = useRef(false);
+  const completedRef = useRef(false);
   const activeRef = useRef(false);
   const onInputLevelRef = useRef(onInputLevel);
-  const onAchievedRef = useRef(onAchieved);
+  const onEvaluatedRef = useRef(onEvaluated);
   onInputLevelRef.current = onInputLevel;
-  onAchievedRef.current = onAchieved;
+  onEvaluatedRef.current = onEvaluated;
+
+  // Los eventos PCM llegan desde un emisor nativo. Publicar en el siguiente
+  // frame evita que React agrupe todas las lecturas hasta el final del bloque.
+  const publishUiSnapshot = useCallback(() => {
+    if (uiFrameRef.current !== null) return;
+    uiFrameRef.current = requestAnimationFrame(() => {
+      uiFrameRef.current = null;
+      setPitch(pitchSnapshotRef.current);
+      setMatch(matchSnapshotRef.current);
+    });
+  }, []);
 
   const resetAnalysis = useCallback(() => {
     samplesRef.current = new Float32Array(0);
+    if (uiFrameRef.current !== null) cancelAnimationFrame(uiFrameRef.current);
+    uiFrameRef.current = null;
+    pitchSnapshotRef.current = null;
+    matchSnapshotRef.current = IDLE_MATCH;
     recentFrequenciesRef.current = [];
     lastAnalysisAtRef.current = 0;
-    holdStartedAtRef.current = null;
-    lastInTuneAtRef.current = null;
+    capturedMsRef.current = 0;
+    captureStartedAtRef.current = null;
+    evaluationReadingsRef.current = [];
     lastPitchAtRef.current = null;
     pitchVisibleRef.current = false;
     smoothedLevelRef.current = 0;
-    achievedRef.current = false;
+    completedRef.current = false;
     setPitch(null);
     setMatch(IDLE_MATCH);
+    setEvaluation(null);
     onInputLevelRef.current?.(0);
   }, []);
 
@@ -163,9 +202,38 @@ export function usePitchDetector({
     setAttempt((value) => value + 1);
   }, [resetAnalysis]);
 
+  const completeEvaluation = useCallback(() => {
+    if (completedRef.current || evaluationDurationMs === null) return;
+    completedRef.current = true;
+    const readings = evaluationReadingsRef.current;
+    const representativeFrequency = readings.length > 0
+      ? median(readings.map((item) => item.frequencyHz))
+      : 0;
+    const representativeCents = readings.length > 0
+      ? Math.round(centsFrom(representativeFrequency, target.frequencyHz))
+      : 0;
+    const inTuneRatio = readings.filter((item) => item.inTune).length / Math.max(1, readings.length);
+    const finalEvaluation: PitchEvaluation = {
+      correct: readings.length > 0 && Math.abs(representativeCents) <= centsTolerance,
+      frequencyHz: representativeFrequency,
+      cents: representativeCents,
+      inTuneRatio,
+      sampleCount: readings.length,
+    };
+    matchSnapshotRef.current = {
+      ...matchSnapshotRef.current,
+      capturedMs: evaluationDurationMs,
+      progress: 1,
+      completed: true,
+    };
+    publishUiSnapshot();
+    setEvaluation(finalEvaluation);
+    onEvaluatedRef.current?.(finalEvaluation);
+  }, [centsTolerance, evaluationDurationMs, publishUiSnapshot, target.frequencyHz]);
+
   const handleBuffer = useCallback(
     (buffer: { data: ArrayBuffer; sampleRate: number; channels: number }) => {
-      if (!activeRef.current || achievedRef.current) return;
+      if (!activeRef.current || completedRef.current) return;
 
       const appended = appendMonoSamples(samplesRef.current, buffer.data, buffer.channels);
       samplesRef.current = appended.samples;
@@ -174,7 +242,35 @@ export function usePitchDetector({
       smoothedLevelRef.current = smoothedLevel;
       onInputLevelRef.current?.(smoothedLevel);
       const now = Date.now();
+
+      const soundDetected = rawLevel >= MINIMUM_AUDIBLE_LEVEL;
+      let captureCompleted = false;
+      if (evaluationDurationMs !== null) {
+        if (captureStartedAtRef.current === null && soundDetected) {
+          const bytesPerSample = 2;
+          const frames = buffer.data.byteLength / bytesPerSample / Math.max(1, buffer.channels);
+          const bufferDurationMs = (frames / buffer.sampleRate) * 1000;
+          captureStartedAtRef.current = now - Math.min(bufferDurationMs, ANALYSIS_INTERVAL_MS);
+        }
+        if (captureStartedAtRef.current !== null) {
+          capturedMsRef.current = Math.min(
+            evaluationDurationMs,
+            now - captureStartedAtRef.current,
+          );
+          captureCompleted = capturedMsRef.current >= evaluationDurationMs;
+          matchSnapshotRef.current = {
+            ...matchSnapshotRef.current,
+            capturedMs: capturedMsRef.current,
+            progress: capturedMsRef.current / evaluationDurationMs,
+            voiceDetected: soundDetected,
+            completed: captureCompleted,
+          };
+          publishUiSnapshot();
+        }
+      }
+
       if (samplesRef.current.length < ANALYSIS_WINDOW_SAMPLES || now - lastAnalysisAtRef.current < ANALYSIS_INTERVAL_MS) {
+        if (captureCompleted) completeEvaluation();
         return;
       }
       lastAnalysisAtRef.current = now;
@@ -194,13 +290,16 @@ export function usePitchDetector({
         ) {
           pitchVisibleRef.current = false;
           recentFrequenciesRef.current = [];
-          setPitch(null);
+          pitchSnapshotRef.current = null;
+          publishUiSnapshot();
         }
-        if (lastInTuneAtRef.current !== null && now - lastInTuneAtRef.current > MAX_UNVOICED_GAP_MS) {
-          holdStartedAtRef.current = null;
-          lastInTuneAtRef.current = null;
-          setMatch(IDLE_MATCH);
-        }
+        matchSnapshotRef.current = {
+          ...matchSnapshotRef.current,
+          inTune: false,
+          voiceDetected: soundDetected,
+        };
+        publishUiSnapshot();
+        if (captureCompleted) completeEvaluation();
         return;
       }
 
@@ -215,41 +314,41 @@ export function usePitchDetector({
       const inTune =
         reading.confidence >= MINIMUM_VALIDATION_CONFIDENCE && Math.abs(cents) <= centsTolerance;
 
-      setPitch({
+      pitchSnapshotRef.current = {
         frequencyHz,
         noteName: note.name,
         octave: note.octave,
         cents: Math.round(cents),
         confidence: reading.confidence,
         label: formatNote(note.name, note.octave),
-      });
+      };
 
-      if (!inTune) {
-        holdStartedAtRef.current = null;
-        lastInTuneAtRef.current = null;
-        setMatch(IDLE_MATCH);
-        return;
+      const validVoice = reading.confidence >= MINIMUM_VALIDATION_CONFIDENCE;
+      if (validVoice && evaluationDurationMs !== null && captureStartedAtRef.current !== null) {
+        evaluationReadingsRef.current.push({ frequencyHz, cents, inTune });
       }
 
-      if (
-        holdStartedAtRef.current === null ||
-        lastInTuneAtRef.current === null ||
-        now - lastInTuneAtRef.current > MAX_UNVOICED_GAP_MS
-      ) {
-        holdStartedAtRef.current = now;
-      }
-      lastInTuneAtRef.current = now;
+      matchSnapshotRef.current = {
+        inTune,
+        capturedMs: capturedMsRef.current,
+        progress:
+          evaluationDurationMs === null ? 0 : capturedMsRef.current / evaluationDurationMs,
+        voiceDetected: evaluationDurationMs === null ? validVoice : soundDetected,
+        completed: captureCompleted,
+      };
+      publishUiSnapshot();
 
-      const heldMs = Math.min(holdMs, now - (holdStartedAtRef.current ?? now));
-      const achieved = heldMs >= holdMs;
-      setMatch({ inTune: true, heldMs, progress: heldMs / holdMs, achieved });
-
-      if (achieved && !achievedRef.current) {
-        achievedRef.current = true;
-        onAchievedRef.current?.();
-      }
+      if (captureCompleted) completeEvaluation();
     },
-    [target.frequencyHz, centsTolerance, holdMs, minFrequencyHz, maxFrequencyHz],
+    [
+      target.frequencyHz,
+      centsTolerance,
+      evaluationDurationMs,
+      minFrequencyHz,
+      maxFrequencyHz,
+      completeEvaluation,
+      publishUiSnapshot,
+    ],
   );
 
   const { stream } = useAudioStream({
@@ -311,5 +410,5 @@ export function usePitchDetector({
     };
   }, [enabled, attempt, stream, resetAnalysis, stop]);
 
-  return { status, pitch, match, error, restart, stop };
+  return { status, pitch, match, evaluation, error, restart, stop };
 }
