@@ -3,6 +3,7 @@ import { GuitarDetectionExercise } from './exercises/GuitarDetectionExercise';
 import { ListenAndChooseExercise } from './exercises/ListenAndChooseExercise';
 import { MultipleChoiceExercise } from './exercises/MultipleChoiceExercise';
 import { RhythmTapExercise } from './exercises/RhythmTapExercise';
+import { VoicePitchExercise } from './exercises/VoicePitchExercise';
 
 /**
  * Único punto que traduce `exercise.type` a componente.
@@ -20,5 +21,7 @@ export function ExerciseRenderer({ exercise, result, onResult }: ExerciseCompone
       return <RhythmTapExercise exercise={exercise} result={result} onResult={onResult} />;
     case 'guitar_detection':
       return <GuitarDetectionExercise exercise={exercise} result={result} onResult={onResult} />;
+    case 'voice_pitch':
+      return <VoicePitchExercise exercise={exercise} result={result} onResult={onResult} />;
   }
 }
