@@ -18,6 +18,7 @@ const TYPE_ICONS: Record<ExerciseType, string> = {
   listen_and_choose: '👂',
   rhythm_tap: '🥁',
   guitar_detection: '🎤',
+  voice_pitch: '🎙️',
 };
 
 function getNodeIcon(lesson: Lesson, state: LessonState): string {

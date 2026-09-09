@@ -13,6 +13,7 @@ import guitarU1L1 from './lessons/guitar-u1-l1.json';
 import guitarU1L2 from './lessons/guitar-u1-l2.json';
 import guitarU2L1 from './lessons/guitar-u2-l1.json';
 import pianoU1L1 from './lessons/piano-u1-l1.json';
+import voiceU1L1 from './lessons/voice-u1-l1.json';
 import { ContentValidationError, parseInstrument, parseLesson, parseUnit } from './schema';
 import unitsJson from './units.json';
 
@@ -23,6 +24,7 @@ const LESSON_SOURCES: readonly { file: string; data: unknown }[] = [
   { file: 'lessons/guitar-u2-l1.json', data: guitarU2L1 },
   { file: 'lessons/piano-u1-l1.json', data: pianoU1L1 },
   { file: 'lessons/drums-u1-l1.json', data: drumsU1L1 },
+  { file: 'lessons/voice-u1-l1.json', data: voiceU1L1 },
 ];
 
 const instruments: readonly Instrument[] = (instrumentsJson as unknown[]).map((raw, index) =>

@@ -1,0 +1,27 @@
+{
+  "id": "voice-u1-l1",
+  "unitId": "voice-u1",
+  "title": "Encuentra SOL",
+  "order": 1,
+  "xpReward": 10,
+  "exerciseTypes": ["voice_pitch"],
+  "requiresMicrophone": true,
+  "isPremium": false,
+  "exercises": [
+    {
+      "id": "voice-u1-l1-e1",
+      "type": "voice_pitch",
+      "prompt": "Canta SOL",
+      "hint": "Sostén la voz con naturalidad. La evaluación comienza cuando el motor detecta una nota vocal estable.",
+      "target": {
+        "kind": "note",
+        "name": "G",
+        "octave": 4,
+        "frequencyHz": 391.995
+      },
+      "evaluationDurationMs": 2000,
+      "centsTolerance": 25,
+      "timeoutMs": 15000
+    }
+  ]
+}

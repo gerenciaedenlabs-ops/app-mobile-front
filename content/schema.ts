@@ -178,6 +178,18 @@ function parseExercise(value: unknown, path: string): Exercise {
         centsTolerance: asNumber(raw.centsTolerance, `${path}.centsTolerance`),
         timeoutMs: asNumber(raw.timeoutMs, `${path}.timeoutMs`),
       };
+    case 'voice_pitch': {
+      const target = parseTarget(raw.target, `${path}.target`);
+      if (target.kind !== 'note') fail(`${path}.target.kind`, 'la voz necesita una nota objetivo');
+      return {
+        ...base,
+        type,
+        target,
+        evaluationDurationMs: asNumber(raw.evaluationDurationMs, `${path}.evaluationDurationMs`),
+        centsTolerance: asNumber(raw.centsTolerance, `${path}.centsTolerance`),
+        timeoutMs: asNumber(raw.timeoutMs, `${path}.timeoutMs`),
+      };
+    }
   }
 }
 

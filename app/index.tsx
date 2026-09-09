@@ -7,6 +7,7 @@ import { StatPill } from '@/components/StatPill';
 import { getCurriculum, getInstruments } from '@/content';
 import { InstrumentCard } from '@/features/instruments/InstrumentCard';
 import { todayKey } from '@/lib/datetime';
+import { DEVELOPMENT_SECTION_ENABLED } from '@/lib/development';
 import { getEffectiveStreak } from '@/lib/streak';
 import { countCompleted } from '@/lib/unlock';
 import { useCompletedLessonIds, useProgressStore } from '@/store/progressStore';
@@ -26,10 +27,6 @@ export default function InstrumentSelectorScreen() {
 
   const openInstrument = (instrumentId: InstrumentId) => {
     setLastInstrument(instrumentId);
-    if (instrumentId === 'voice') {
-      router.push('/voice-pitch-test');
-      return;
-    }
     router.push(`/learn/${instrumentId}`);
   };
 
@@ -72,7 +69,6 @@ export default function InstrumentSelectorScreen() {
                   instrument={instrument}
                   completedLessons={countCompleted(curriculum, completed)}
                   totalLessons={total}
-                  previewAvailable={instrument.id === 'voice'}
                   onPress={() => openInstrument(instrument.id)}
                 />
               );
@@ -94,6 +90,22 @@ export default function InstrumentSelectorScreen() {
         </View>
         <Text className="text-white/70">›</Text>
       </Pressable>
+
+      {DEVELOPMENT_SECTION_ENABLED ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Abrir sección de desarrollo"
+          onPress={() => router.push('/development')}
+          className="mt-3 flex-row items-center gap-3 rounded-2xl border-2 border-dashed border-cyan-300 bg-cyan-50 p-4 active:bg-cyan-100"
+        >
+          <Text className="text-2xl">🛠️</Text>
+          <View className="flex-1">
+            <Text className="text-base font-extrabold text-cyan-800">Sección de desarrollo</Text>
+            <Text className="text-xs text-cyan-700">Prueba los motores de detección</Text>
+          </View>
+          <Text className="text-cyan-700">›</Text>
+        </Pressable>
+      ) : null}
     </Screen>
   );
 }
