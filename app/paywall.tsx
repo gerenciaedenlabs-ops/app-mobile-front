@@ -56,7 +56,7 @@ export default function PaywallScreen() {
 
   return (
     <Screen scroll>
-      <View className="flex-row justify-end py-2">
+      <View className="flex-row justify-start py-2">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Cerrar"
@@ -68,15 +68,29 @@ export default function PaywallScreen() {
         </Pressable>
       </View>
 
-      <View className="items-center">
-        <Text className="text-5xl">👑</Text>
-        <Text className="mt-3 text-center text-3xl font-extrabold text-ink">EdenShip Premium</Text>
-        <Text className="mt-1 text-center text-sm text-ink-muted">
-          Practica sin límites y desbloquea todo el catálogo.
+      <View className="mt-2 items-center">
+        <View className="w-full rounded-xl bg-warning px-4 py-2">
+          <Text className="text-center text-xs font-extrabold uppercase tracking-widest text-white">
+            Oferta especial para músicos
+          </Text>
+        </View>
+        <Text className="mt-5 text-center text-3xl font-extrabold leading-10 text-ink">
+          Practica sin límites con EdenShip Premium
         </Text>
+        <Text className="mt-2 text-center text-sm text-ink-muted">
+          Más práctica, todo el catálogo y ninguna pausa por vidas.
+        </Text>
+
+        <View className="my-7 h-36 w-full items-center justify-center rounded-3xl bg-brand-soft">
+          <View className="flex-row items-end gap-2">
+            <Text className="text-5xl">🎸</Text>
+            <Text className="text-7xl">👑</Text>
+            <Text className="text-5xl">🎹</Text>
+          </View>
+        </View>
       </View>
 
-      <View className="mt-8 gap-3">
+      <View className="gap-3 rounded-2xl border border-slate-200 bg-white p-4">
         {BENEFITS.map((benefit) => (
           <View key={benefit.title} className="flex-row items-start gap-3">
             <Text className="text-xl">{benefit.icon}</Text>
@@ -88,7 +102,8 @@ export default function PaywallScreen() {
         ))}
       </View>
 
-      <View className="mt-8 gap-3">
+      <Text className="mb-3 mt-7 text-lg font-extrabold text-ink">Elige tu plan</Text>
+      <View className="gap-3">
         {PLANS.map((plan) => (
           <PlanCard
             key={plan.id}
@@ -99,7 +114,7 @@ export default function PaywallScreen() {
         ))}
       </View>
 
-      <Button label="Suscribirse" onPress={subscribe} className="mt-6" />
+      <Button label="Empezar con Premium" onPress={subscribe} className="mt-6" />
       <Button label="Restaurar compras" variant="ghost" size="md" onPress={restore} className="mt-2" />
 
       <Text className="mt-4 text-center text-[11px] leading-4 text-ink-muted">

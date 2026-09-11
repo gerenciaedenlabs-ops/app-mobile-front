@@ -34,37 +34,33 @@ export default function InstrumentSelectorScreen() {
 
   return (
     <Screen scroll>
-      <View className="flex-row items-center justify-between py-2">
-        <View className="flex-row items-center gap-2">
-          <StatPill icon="🔥" value={effectiveStreak} label="Racha" />
-          <StatPill icon="⚡" value={xp} label="XP" />
+      <View className="flex-row items-center justify-between border-b border-slate-200 pb-4 pt-2">
+        <View>
+          <Text className="text-2xl font-extrabold text-ink">Mis cursos</Text>
+          <Text className="mt-1 text-xs text-ink-muted">Hola, {user?.username}</Text>
         </View>
-
-        <View className="flex-row items-center gap-2">
-          <HeartsBar current={hearts.current} max={hearts.max} compact />
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Abrir perfil"
-            onPress={() => router.push('/profile')}
-            className="flex-row items-center gap-2 rounded-full bg-white py-2 pl-3 pr-2 active:bg-slate-200"
-          >
-            <Text className="max-w-[92px] text-xs font-bold text-ink" numberOfLines={1}>
-              {user?.username}
-            </Text>
-            <Text className="text-base">👤</Text>
-          </Pressable>
-        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Abrir perfil"
+          onPress={() => router.push('/profile')}
+          className="h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white active:bg-slate-200"
+        >
+          <Text className="text-lg">👤</Text>
+        </Pressable>
       </View>
 
-      <Text className="mt-6 text-3xl font-extrabold text-ink">¿Qué practicamos hoy?</Text>
-      <Text className="mt-1 text-sm text-ink-muted">
-        Elige un instrumento. Puedes cambiar cuando quieras.
+      <View className="mt-4 flex-row items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+        <StatPill icon="🔥" value={effectiveStreak} label="Racha" />
+        <StatPill icon="⚡" value={xp} label="XP" />
+        <HeartsBar current={hearts.current} max={hearts.max} compact />
+      </View>
+
+      <Text className="mt-6 text-sm leading-5 text-ink-muted">
+        Puedes llevar varios cursos a la vez. Tu racha cuenta igual en todos.
       </Text>
 
-      <View className="mt-6 gap-4">
-        {[0, 2].map((rowStart) => (
-          <View key={rowStart} className="flex-row gap-4">
-            {instruments.slice(rowStart, rowStart + 2).map((instrument) => {
+      <View className="mt-4 gap-3">
+        {instruments.map((instrument) => {
               const curriculum = getCurriculum(instrument.id);
               const total = curriculum.reduce((sum, entry) => sum + entry.lessons.length, 0);
 
@@ -78,8 +74,6 @@ export default function InstrumentSelectorScreen() {
                 />
               );
             })}
-          </View>
-        ))}
       </View>
 
       <Pressable

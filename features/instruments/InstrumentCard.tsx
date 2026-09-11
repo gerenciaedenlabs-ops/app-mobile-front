@@ -32,26 +32,30 @@ export function InstrumentCard({
             : 'Próximamente'
       }`}
       onPress={onPress}
-      className="flex-1 rounded-2xl border-2 border-slate-200 bg-white p-4 active:bg-surface-sunken"
+      className="w-full flex-row items-center gap-4 rounded-2xl border-2 border-slate-200 bg-white p-4 active:bg-surface-sunken"
     >
       <View
         style={{ backgroundColor: `${instrument.accentColor}1A` }}
-        className="h-14 w-14 items-center justify-center rounded-2xl"
+        className="h-16 w-16 items-center justify-center rounded-2xl"
       >
         <Text className="text-2xl">{instrument.icon}</Text>
       </View>
 
-      <Text className="mt-3 text-lg font-extrabold text-ink">{instrument.name}</Text>
-      <Text className="mt-0.5 text-xs leading-4 text-ink-muted" numberOfLines={2}>
-        {instrument.tagline}
-      </Text>
+      <View className="min-w-0 flex-1">
+        <View className="flex-row items-center justify-between gap-2">
+          <Text className="flex-1 text-lg font-extrabold text-ink">{instrument.name}</Text>
+          <Text className="text-lg text-ink-muted">›</Text>
+        </View>
+        <Text className="mt-0.5 text-xs leading-4 text-ink-muted" numberOfLines={2}>
+          {instrument.tagline}
+        </Text>
 
-      <View className="mt-3">
+        <View className="mt-3">
         {hasContent ? (
           <>
             <ProgressBar
               value={progress}
-              className="h-2"
+              className="h-1.5"
               fillClassName="bg-ink"
               label={`Progreso de ${instrument.name}`}
             />
@@ -68,6 +72,7 @@ export function InstrumentCard({
             Próximamente
           </Text>
         )}
+        </View>
       </View>
     </Pressable>
   );

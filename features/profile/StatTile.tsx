@@ -11,10 +11,10 @@ interface StatTileProps {
 
 export function StatTile({ icon, value, label, className }: StatTileProps) {
   return (
-    <View className={cn('flex-1 rounded-2xl border border-slate-200 bg-white p-4', className)}>
-      <Text className="text-2xl">{icon}</Text>
-      <Text className="mt-1 text-2xl font-extrabold text-ink">{value}</Text>
-      <Text className="text-xs text-ink-muted">{label}</Text>
+    <View className={cn('flex-1 items-center rounded-2xl border border-slate-200 bg-white px-2 py-4', className)}>
+      <Text className="text-xl">{icon}</Text>
+      <Text className="mt-1 text-xl font-extrabold text-ink">{value}</Text>
+      <Text className="text-center text-[10px] font-bold uppercase tracking-wide text-ink-muted">{label}</Text>
     </View>
   );
 }

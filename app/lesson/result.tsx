@@ -41,20 +41,23 @@ export default function LessonResultScreen() {
   return (
     <Screen>
       <View className="flex-1 items-center justify-center">
-        <Text className="text-7xl">{passed ? '🎉' : '💔'}</Text>
-        <Text className="mt-4 text-center text-3xl font-extrabold text-ink">
-          {passed ? '¡Lección completada!' : 'Te quedaste sin vidas'}
+        <View className="h-28 w-28 items-center justify-center rounded-full bg-brand-soft">
+          <Text className="text-6xl">{passed ? '🎉' : '💔'}</Text>
+        </View>
+        <Text className="mt-6 text-center text-3xl font-extrabold text-ink">
+          {passed ? '¡Práctica completada!' : 'Te quedaste sin vidas'}
         </Text>
         <Text className="mt-2 text-center text-sm text-ink-muted">
           {lesson?.title ?? 'Lección'} · {correct} de {total} aciertos
         </Text>
 
-        <View className="mt-8 w-full flex-row gap-3">
-          <StatTile icon="⚡" value={`+${xpEarned}`} label="XP ganado" />
-          <StatTile icon="🔥" value={currentStreak} label="Días de racha" />
+        <View className="mt-8 w-full flex-row gap-2">
+          <StatTile icon="⚡" value={`+${xpEarned}`} label="EXP totales" />
+          <StatTile icon="🎯" value={`${correct}/${total}`} label="Aciertos" />
+          <StatTile icon="🔥" value={currentStreak} label="Racha" />
         </View>
 
-        <View className="mt-3 w-full flex-row items-center justify-between rounded-2xl border border-slate-200 bg-white p-4">
+        <View className="mt-3 w-full flex-row items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
           <View>
             <Text className="text-sm font-bold text-ink">Vidas restantes</Text>
             <Text className="text-xs text-ink-muted">
@@ -72,7 +75,7 @@ export default function LessonResultScreen() {
       </View>
 
       <View className="gap-3">
-        <Button label="Seguir" onPress={goToTree} />
+        <Button label={passed ? `Recibir ${xpEarned} EXP` : 'Volver al curso'} onPress={goToTree} />
         {!passed ? (
           <Button
             label="Conseguir vidas ilimitadas"

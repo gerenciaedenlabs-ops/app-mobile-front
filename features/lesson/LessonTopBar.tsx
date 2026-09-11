@@ -13,13 +13,13 @@ interface LessonTopBarProps {
 
 export function LessonTopBar({ progress, hearts, maxHearts, onExit }: LessonTopBarProps) {
   return (
-    <View className="flex-row items-center gap-3 pb-4">
+    <View className="-mx-5 flex-row items-center gap-3 border-b border-slate-200 px-5 pb-4 pt-1">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Salir de la lección"
         onPress={onExit}
         hitSlop={12}
-        className="h-9 w-9 items-center justify-center rounded-full active:bg-slate-200"
+        className="h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white active:bg-slate-200"
       >
         <Text className="text-xl text-ink-muted">✕</Text>
       </Pressable>
