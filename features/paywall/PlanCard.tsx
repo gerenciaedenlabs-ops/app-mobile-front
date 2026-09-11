@@ -31,6 +31,9 @@ export function PlanCard({ plan, selected, onSelect }: PlanCardProps) {
       )}
     >
       <View className="flex-row items-center justify-between">
+        <View className={cn('mr-3 h-6 w-6 items-center justify-center rounded-full border-2', selected ? 'border-brand' : 'border-slate-300')}>
+          {selected ? <View className="h-3 w-3 rounded-full bg-brand" /> : null}
+        </View>
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
             <Text className="text-base font-extrabold text-ink">{plan.title}</Text>

@@ -23,7 +23,8 @@
         {
           "microphonePermission": "EdenShip usa el micrófono para detectar la afinación de tu voz o instrumento y darte feedback en tiempo real."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

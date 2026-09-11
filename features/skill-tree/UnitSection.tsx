@@ -13,16 +13,16 @@ interface UnitSectionProps {
 }
 
 /** Zigzag tipo Duolingo: el patrón se repite cada 4 nodos. */
-const OFFSET_PATTERN = [0, 56, 0, -56];
+const OFFSET_PATTERN = [0, 64, 38, -38, -64, 0];
 
 export function UnitSection({ tree, accentColor, onSelectLesson }: UnitSectionProps) {
   const total = tree.nodes.length;
 
   return (
-    <View className="mb-2">
+    <View className="mb-4">
       <View
         style={{ backgroundColor: tree.locked ? '#E2E8F0' : accentColor }}
-        className="mb-6 rounded-2xl px-4 py-3"
+        className="mb-8 rounded-2xl px-4 py-4"
       >
         <Text
           className={cn(
@@ -30,9 +30,9 @@ export function UnitSection({ tree, accentColor, onSelectLesson }: UnitSectionPr
             tree.locked ? 'text-ink-muted' : 'text-white/80',
           )}
         >
-          Unidad {tree.unit.order} · {tree.completedCount}/{total}
+          ETAPA 1 · UNIDAD {tree.unit.order} · {tree.completedCount}/{total}
         </Text>
-        <Text className={cn('text-lg font-extrabold', tree.locked ? 'text-ink-soft' : 'text-white')}>
+        <Text className={cn('mt-1 text-lg font-extrabold', tree.locked ? 'text-ink-soft' : 'text-white')}>
           {tree.unit.title}
         </Text>
         {tree.locked ? (
@@ -42,10 +42,10 @@ export function UnitSection({ tree, accentColor, onSelectLesson }: UnitSectionPr
         ) : null}
       </View>
 
-      <View className="items-center">
+      <View className="items-center pb-3">
         {tree.nodes.map((node, index) => (
           <View key={node.lesson.id} className="items-center">
-            {index > 0 ? <View className="h-6 w-1 rounded-full bg-slate-200" /> : null}
+            {index > 0 ? <View className="h-7 w-0.5 bg-slate-200" /> : null}
             <LessonNode
               lesson={node.lesson}
               state={node.state}

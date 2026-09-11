@@ -15,7 +15,7 @@ interface ChoiceListProps {
 /** Lista de opciones compartida por multiple_choice y listen_and_choose. */
 export function ChoiceList({ choices, selectedId, correctChoiceId, revealed, onSelect }: ChoiceListProps) {
   return (
-    <View className="gap-3">
+    <View className="gap-2.5">
       {choices.map((choice) => {
         const isSelected = choice.id === selectedId;
         const isCorrect = choice.id === correctChoiceId;
@@ -31,7 +31,7 @@ export function ChoiceList({ choices, selectedId, correctChoiceId, revealed, onS
             disabled={revealed}
             onPress={() => onSelect(choice.id)}
             className={cn(
-              'min-h-[60px] justify-center rounded-2xl border-2 bg-white px-4 py-3',
+              'min-h-[56px] justify-center rounded-xl border-2 bg-white px-4 py-3',
               !revealed && isSelected && 'border-brand bg-brand-soft',
               !revealed && !isSelected && 'border-slate-200 active:bg-surface-sunken',
               showAsCorrect && 'border-success bg-success-soft',
@@ -40,6 +40,11 @@ export function ChoiceList({ choices, selectedId, correctChoiceId, revealed, onS
             )}
           >
             <View className="flex-row items-center justify-between gap-3">
+              <View className={cn('h-7 w-7 items-center justify-center rounded-md border', isSelected ? 'border-brand' : 'border-slate-200')}>
+                <Text className={cn('text-xs font-bold', isSelected ? 'text-brand' : 'text-ink-muted')}>
+                  {choices.indexOf(choice) + 1}
+                </Text>
+              </View>
               <View className="flex-1">
                 <Text
                   className={cn(
