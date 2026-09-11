@@ -1,4 +1,4 @@
-import { Stack } from 'expo-router';
+import { type Href, Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { setAudioModeAsync } from 'expo-audio';
 import { useEffect } from 'react';
@@ -7,11 +7,21 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useHeartsSync } from '@/hooks/useHearts';
-import { useProgressStore } from '@/store/progressStore';
+import { useAuthStore } from '@/store/authStore';
+import {
+  hydrateProgressForUser,
+  unloadProgressUser,
+  useProgressStore,
+} from '@/store/progressStore';
 
 import '../global.css';
 
 export default function RootLayout() {
+  const router = useRouter();
+  const segments = useSegments();
+  const currentSegment = segments[0] as string | undefined;
+  const authHasHydrated = useAuthStore((state) => state.hasHydrated);
+  const user = useAuthStore((state) => state.user);
   const hasHydrated = useProgressStore((state) => state.hasHydrated);
 
   // Pone al día los corazones al abrir y al volver a primer plano.
@@ -22,6 +32,25 @@ export default function RootLayout() {
     void setAudioModeAsync({ playsInSilentMode: true });
   }, []);
 
+  useEffect(() => {
+    if (!authHasHydrated) return;
+    let cancelled = false;
+
+    if (!user) {
+      unloadProgressUser();
+      if (currentSegment !== 'login') router.replace('/login' as Href);
+      return;
+    }
+
+    void hydrateProgressForUser(user.id).then(() => {
+      if (!cancelled && currentSegment === 'login') router.replace('/');
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authHasHydrated, user, router, currentSegment]);
+
   // TODO(OneSignal): inicializar el SDK aquí y pedir permiso de notificaciones
   // tras la primera lección completada, no en el arranque en frío.
 
@@ -29,8 +58,9 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar style="dark" />
-        {hasHydrated ? (
+        {authHasHydrated && (!user || hasHydrated) ? (
           <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F1F5F9' } }}>
+            <Stack.Screen name="login" options={{ gestureEnabled: false }} />
             <Stack.Screen name="index" />
             <Stack.Screen name="learn/[instrumentId]" />
             <Stack.Screen name="lesson/[lessonId]" options={{ gestureEnabled: false }} />

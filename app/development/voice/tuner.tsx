@@ -1,6 +1,6 @@
 import { Redirect, useRouter } from 'expo-router';
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Animated, Pressable, Text, View } from 'react-native';
+import { Animated, Pressable, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
@@ -9,7 +9,7 @@ import {
   NOTE_NAMES_ES,
   TunerNeedle,
 } from '@/features/voice/VoicePitchChallenge';
-import { usePitchDetector } from '@/hooks/usePitchDetector';
+import { type DetectedPitch, type PitchTargetMatch, usePitchDetector } from '@/hooks/usePitchDetector';
 import { cn } from '@/lib/cn';
 import { DEVELOPMENT_SECTION_ENABLED } from '@/lib/development';
 import { formatNote, noteToFrequency } from '@/lib/pitch';
@@ -24,6 +24,13 @@ export default function VoiceTunerScreen() {
   const [selectedOctave, setSelectedOctave] = useState<(typeof OCTAVES)[number]>(4);
   const [listening, setListening] = useState(false);
   const microphoneLevel = useRef(new Animated.Value(0)).current;
+  const liveNeedlePosition = useRef(new Animated.Value(0)).current;
+  const liveNeedleOpacity = useRef(new Animated.Value(0)).current;
+  const liveTune = useRef(new Animated.Value(0)).current;
+  const frequencyRef = useRef<TextInput>(null);
+  const detectedNoteRef = useRef<TextInput>(null);
+  const centsRef = useRef<TextInput>(null);
+  const guidanceRef = useRef<TextInput>(null);
 
   const target = useMemo(
     () => ({
@@ -45,6 +52,31 @@ export default function VoiceTunerScreen() {
     [microphoneLevel],
   );
 
+  const handleLivePitch = useCallback(
+    (pitch: DetectedPitch | null) => {
+      frequencyRef.current?.setNativeProps({ text: pitch ? pitch.frequencyHz.toFixed(1) : '--.-' });
+      detectedNoteRef.current?.setNativeProps({
+        text: pitch ? `${NOTE_NAMES_ES[pitch.noteName] ?? pitch.noteName} · ${pitch.label}` : '—',
+      });
+      centsRef.current?.setNativeProps({ text: pitch ? `${pitch.cents > 0 ? '+' : ''}${pitch.cents} cents` : '—' });
+      liveNeedleOpacity.setValue(pitch ? 1 : 0);
+      if (pitch) liveNeedlePosition.setValue(Math.max(-1, Math.min(1, pitch.cents / 50)));
+    },
+    [liveNeedleOpacity, liveNeedlePosition],
+  );
+
+  const handleLiveMatch = useCallback(
+    (match: PitchTargetMatch) => {
+      liveTune.setValue(match.inTune ? 1 : 0);
+      guidanceRef.current?.setNativeProps({
+        text: match.inTune
+          ? `Afinada dentro de ±${CENTS_TOLERANCE} cents`
+          : 'Sigue ajustando hasta llevar la aguja al centro',
+      });
+    },
+    [liveTune],
+  );
+
   const detector = usePitchDetector({
     target,
     centsTolerance: CENTS_TOLERANCE,
@@ -53,18 +85,22 @@ export default function VoiceTunerScreen() {
     minFrequencyHz: 70,
     maxFrequencyHz: 1100,
     onInputLevel: handleInputLevel,
+    onPitch: handleLivePitch,
+    onMatch: handleLiveMatch,
   });
 
   if (!DEVELOPMENT_SECTION_ENABLED) return <Redirect href="/" />;
 
   const cents = detector.pitch?.cents ?? 0;
-  const detectedLabel = detector.pitch
-    ? `${NOTE_NAMES_ES[detector.pitch.noteName] ?? detector.pitch.noteName} · ${detector.pitch.label}`
-    : '—';
 
   const toggleListening = () => {
-    if (listening) detector.stop();
-    else detector.restart();
+    if (listening) {
+      detector.stop();
+      guidanceRef.current?.setNativeProps({ text: 'Activa el micrófono para comenzar' });
+    } else {
+      detector.restart();
+      guidanceRef.current?.setNativeProps({ text: 'Escuchando tu voz…' });
+    }
     setListening((current) => !current);
   };
 
@@ -142,26 +178,39 @@ export default function VoiceTunerScreen() {
       <View className="mt-4 rounded-3xl bg-white p-5">
         <View className="items-center">
           <Text className="text-xs font-bold uppercase tracking-wider text-ink-muted">Frecuencia en vivo</Text>
-          <Text className="mt-1 text-5xl font-extrabold tabular-nums text-cyan-700">
-            {detector.pitch ? detector.pitch.frequencyHz.toFixed(1) : '--.-'}
-          </Text>
+          <TextInput
+            ref={frequencyRef}
+            editable={false}
+            defaultValue="--.-"
+            className="mt-1 p-0 text-center text-5xl font-extrabold tabular-nums text-cyan-700"
+          />
           <Text className="text-base font-bold text-cyan-700">Hz</Text>
-          <Text className="mt-2 text-lg font-extrabold text-ink">{detectedLabel}</Text>
+          <TextInput
+            ref={detectedNoteRef}
+            editable={false}
+            defaultValue="—"
+            className="mt-2 p-0 text-center text-lg font-extrabold text-ink"
+          />
         </View>
 
         <View className="mt-5">
-          <TunerNeedle cents={cents} visible={detector.pitch !== null} inTune={detector.match.inTune} />
+          <TunerNeedle
+            cents={cents}
+            visible={detector.pitch !== null}
+            inTune={detector.match.inTune}
+            livePosition={liveNeedlePosition}
+            liveOpacity={liveNeedleOpacity}
+            liveTune={liveTune}
+          />
         </View>
         <View className="mt-2 flex-row justify-between">
           <Text className="text-xs text-ink-muted">Grave</Text>
-          <Text
-            className={cn(
-              'text-sm font-extrabold',
-              detector.pitch ? (detector.match.inTune ? 'text-success' : 'text-danger') : 'text-ink-muted',
-            )}
-          >
-            {detector.pitch ? `${cents > 0 ? '+' : ''}${cents} cents` : '—'}
-          </Text>
+          <TextInput
+            ref={centsRef}
+            editable={false}
+            defaultValue="—"
+            className="p-0 text-center text-sm font-extrabold text-ink"
+          />
           <Text className="text-xs text-ink-muted">Agudo</Text>
         </View>
 
@@ -169,15 +218,12 @@ export default function VoiceTunerScreen() {
           <Text className="text-center text-sm font-bold text-ink">
             Objetivo: {NOTE_NAMES_ES[selectedNote]} ({formatNote(selectedNote, selectedOctave)}) · {target.frequencyHz.toFixed(1)} Hz
           </Text>
-          <Text className="mt-1 text-center text-xs text-ink-muted">
-            {detector.pitch
-              ? detector.match.inTune
-                ? `Afinada dentro de ±${CENTS_TOLERANCE} cents`
-                : 'Sigue ajustando hasta llevar la aguja al centro'
-              : listening
-                ? 'Escuchando tu voz…'
-                : 'Activa el micrófono para comenzar'}
-          </Text>
+          <TextInput
+            ref={guidanceRef}
+            editable={false}
+            defaultValue={listening ? 'Escuchando tu voz…' : 'Activa el micrófono para comenzar'}
+            className="mt-1 p-0 text-center text-xs text-ink-muted"
+          />
         </View>
       </View>
 

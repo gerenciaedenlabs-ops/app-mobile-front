@@ -54,6 +54,9 @@ export interface UsePitchDetectorOptions {
   maxFrequencyHz?: number;
   /** Entrega la envolvente del micrófono sin forzar renders de React. */
   onInputLevel?: (level: number) => void;
+  /** Canal inmediato para interfaces de afinación que no deben esperar un render de React. */
+  onPitch?: (pitch: DetectedPitch | null) => void;
+  onMatch?: (match: PitchTargetMatch) => void;
   onEvaluated?: (evaluation: PitchEvaluation) => void;
 }
 
@@ -136,6 +139,8 @@ export function usePitchDetector({
   minFrequencyHz = 70,
   maxFrequencyHz = 1100,
   onInputLevel,
+  onPitch,
+  onMatch,
   onEvaluated,
 }: UsePitchDetectorOptions): PitchDetectorResult {
   const [status, setStatus] = useState<PitchDetectorStatus>('idle');
@@ -160,8 +165,12 @@ export function usePitchDetector({
   const completedRef = useRef(false);
   const activeRef = useRef(false);
   const onInputLevelRef = useRef(onInputLevel);
+  const onPitchRef = useRef(onPitch);
+  const onMatchRef = useRef(onMatch);
   const onEvaluatedRef = useRef(onEvaluated);
   onInputLevelRef.current = onInputLevel;
+  onPitchRef.current = onPitch;
+  onMatchRef.current = onMatch;
   onEvaluatedRef.current = onEvaluated;
 
   // Los eventos PCM llegan desde un emisor nativo. Publicar en el siguiente
@@ -194,6 +203,8 @@ export function usePitchDetector({
     setMatch(IDLE_MATCH);
     setEvaluation(null);
     onInputLevelRef.current?.(0);
+    onPitchRef.current?.(null);
+    onMatchRef.current?.(IDLE_MATCH);
   }, []);
 
   const restart = useCallback(() => {
@@ -226,6 +237,7 @@ export function usePitchDetector({
       progress: 1,
       completed: true,
     };
+    onMatchRef.current?.(matchSnapshotRef.current);
     publishUiSnapshot();
     setEvaluation(finalEvaluation);
     onEvaluatedRef.current?.(finalEvaluation);
@@ -265,6 +277,7 @@ export function usePitchDetector({
             voiceDetected: soundDetected,
             completed: captureCompleted,
           };
+          onMatchRef.current?.(matchSnapshotRef.current);
           publishUiSnapshot();
         }
       }
@@ -291,6 +304,7 @@ export function usePitchDetector({
           pitchVisibleRef.current = false;
           recentFrequenciesRef.current = [];
           pitchSnapshotRef.current = null;
+          onPitchRef.current?.(null);
           publishUiSnapshot();
         }
         matchSnapshotRef.current = {
@@ -298,6 +312,7 @@ export function usePitchDetector({
           inTune: false,
           voiceDetected: soundDetected,
         };
+        onMatchRef.current?.(matchSnapshotRef.current);
         publishUiSnapshot();
         if (captureCompleted) completeEvaluation();
         return;
@@ -322,6 +337,7 @@ export function usePitchDetector({
         confidence: reading.confidence,
         label: formatNote(note.name, note.octave),
       };
+      onPitchRef.current?.(pitchSnapshotRef.current);
 
       const validVoice = reading.confidence >= MINIMUM_VALIDATION_CONFIDENCE;
       if (validVoice && evaluationDurationMs !== null && captureStartedAtRef.current !== null) {
@@ -336,6 +352,7 @@ export function usePitchDetector({
         voiceDetected: evaluationDurationMs === null ? validVoice : soundDetected,
         completed: captureCompleted,
       };
+      onMatchRef.current?.(matchSnapshotRef.current);
       publishUiSnapshot();
 
       if (captureCompleted) completeEvaluation();
