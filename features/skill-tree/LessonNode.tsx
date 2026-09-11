@@ -33,6 +33,11 @@ export function LessonNode({ lesson, state, accentColor, offset, onPress }: Less
 
   return (
     <View style={{ transform: [{ translateX: offset }] }} className="items-center">
+      {state === 'available' ? (
+        <View className="mb-2 rounded-full bg-brand px-3 py-1">
+          <Text className="text-[10px] font-extrabold tracking-widest text-white">EMPIEZA</Text>
+        </View>
+      ) : null}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={lesson.title}
@@ -44,9 +49,9 @@ export function LessonNode({ lesson, state, accentColor, offset, onPress }: Less
         onPress={onPress}
         style={locked ? undefined : { backgroundColor: accentColor }}
         className={cn(
-          'h-[72px] w-[72px] items-center justify-center rounded-full active:opacity-80',
+          'h-[68px] w-[68px] items-center justify-center rounded-full border-2 active:opacity-80',
           locked && 'bg-slate-300',
-          completed && 'border-4 border-white',
+          completed ? 'border-white' : locked ? 'border-slate-300' : 'border-brand-strong',
         )}
       >
         <Text className="text-3xl">{getNodeIcon(lesson, state)}</Text>

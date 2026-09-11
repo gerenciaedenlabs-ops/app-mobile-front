@@ -26,6 +26,7 @@ interface AuthStore {
   hasHydrated: boolean;
   isLoggingIn: boolean;
   login: (identifier: string, password: string) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -43,6 +44,20 @@ export const useAuthStore = create<AuthStore>()(
           const session = await apiRequest<LoginResponse>('auth/login', {
             method: 'POST',
             body: JSON.stringify({ identifier: identifier.trim(), password }),
+          });
+          set({ token: session.token, user: session.user, isLoggingIn: false });
+        } catch (error) {
+          set({ isLoggingIn: false });
+          throw error;
+        }
+      },
+
+      loginWithGoogle: async (idToken) => {
+        set({ isLoggingIn: true });
+        try {
+          const session = await apiRequest<LoginResponse>('auth/google', {
+            method: 'POST',
+            body: JSON.stringify({ idToken }),
           });
           set({ token: session.token, user: session.user, isLoggingIn: false });
         } catch (error) {

@@ -52,9 +52,14 @@ export function Button({
       disabled={disabled}
       onPress={onPress}
       className={cn(
-        'items-center justify-center rounded-2xl',
+        'items-center justify-center rounded-2xl border-b-4',
         size === 'lg' ? 'min-h-[56px] px-6 py-4' : 'min-h-[44px] px-4 py-2.5',
         CONTAINER[variant],
+        variant === 'primary' && 'border-brand-strong',
+        variant === 'secondary' && 'border-slate-300',
+        variant === 'success' && 'border-green-700',
+        variant === 'danger' && 'border-red-700',
+        variant === 'ghost' && 'border-transparent',
         disabled && 'opacity-40',
         className,
       )}
