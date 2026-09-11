@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Text, View } from 'react-native';
+import { Animated, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/Button';
-import { ProgressBar } from '@/components/ProgressBar';
 import {
+  type DetectedPitch,
   type PitchEvaluation,
+  type PitchTargetMatch,
   type PitchTarget,
   usePitchDetector,
 } from '@/hooks/usePitchDetector';
@@ -76,17 +77,35 @@ export function MicrophoneLevel({ level, active }: { level: Animated.Value; acti
   );
 }
 
-export function TunerNeedle({ cents, visible, inTune }: { cents: number; visible: boolean; inTune: boolean }) {
-  const position = useRef(new Animated.Value(0)).current;
+interface TunerNeedleProps {
+  cents: number;
+  visible: boolean;
+  inTune: boolean;
+  livePosition?: Animated.Value;
+  liveOpacity?: Animated.Value;
+  liveTune?: Animated.Value;
+}
+
+export function TunerNeedle({
+  cents,
+  visible,
+  inTune,
+  livePosition,
+  liveOpacity,
+  liveTune,
+}: TunerNeedleProps) {
+  const fallbackPosition = useRef(new Animated.Value(0)).current;
+  const position = livePosition ?? fallbackPosition;
   const [trackWidth, setTrackWidth] = useState(0);
 
   useEffect(() => {
-    Animated.timing(position, {
+    if (livePosition) return;
+    Animated.timing(fallbackPosition, {
       toValue: Math.max(-1, Math.min(1, cents / 50)),
       duration: 120,
       useNativeDriver: true,
     }).start();
-  }, [cents, position]);
+  }, [cents, fallbackPosition, livePosition]);
 
   const translateX = position.interpolate({
     inputRange: [-1, 1],
@@ -101,8 +120,17 @@ export function TunerNeedle({ cents, visible, inTune }: { cents: number; visible
       <View className="h-1 w-full rounded-full bg-slate-200" />
       <View className="absolute left-1/2 h-9 w-0.5 bg-slate-400" />
       <Animated.View
-        style={{ left: '50%', opacity: visible ? 1 : 0, transform: [{ translateX }] }}
-        className={cn('absolute h-9 w-1.5 rounded-full', inTune ? 'bg-success' : 'bg-danger')}
+        style={{
+          left: '50%',
+          opacity: liveOpacity ?? (visible ? 1 : 0),
+          backgroundColor: liveTune
+            ? liveTune.interpolate({ inputRange: [0, 1], outputRange: ['#EF4444', '#22C55E'] })
+            : inTune
+              ? '#22C55E'
+              : '#EF4444',
+          transform: [{ translateX }],
+        }}
+        className="absolute h-9 w-1.5 rounded-full"
       />
     </View>
   );
@@ -121,6 +149,14 @@ export function VoicePitchChallenge({
 }: VoicePitchChallengeProps) {
   const [challengeState, setChallengeState] = useState<ChallengeState>('ready');
   const microphoneLevel = useRef(new Animated.Value(0)).current;
+  const liveNeedlePosition = useRef(new Animated.Value(0)).current;
+  const liveNeedleOpacity = useRef(new Animated.Value(0)).current;
+  const liveTune = useRef(new Animated.Value(0)).current;
+  const liveProgress = useRef(new Animated.Value(0)).current;
+  const detectedNoteRef = useRef<TextInput>(null);
+  const frequencyRef = useRef<TextInput>(null);
+  const centsRef = useRef<TextInput>(null);
+  const progressPercentRef = useRef<TextInput>(null);
   const resultSentRef = useRef(false);
 
   const finish = useCallback(
@@ -144,6 +180,32 @@ export function VoicePitchChallenge({
     [microphoneLevel],
   );
 
+  const handleLivePitch = useCallback(
+    (pitch: DetectedPitch | null) => {
+      detectedNoteRef.current?.setNativeProps({
+        text: pitch ? `${NOTE_NAMES_ES[pitch.noteName] ?? pitch.noteName} (${pitch.label})` : '—',
+      });
+      frequencyRef.current?.setNativeProps({ text: pitch ? `${pitch.frequencyHz.toFixed(1)} Hz` : '--.- Hz' });
+      centsRef.current?.setNativeProps({ text: pitch ? `${pitch.cents > 0 ? '+' : ''}${pitch.cents} cents` : '—' });
+      liveNeedleOpacity.setValue(pitch ? 1 : 0);
+      if (pitch) liveNeedlePosition.setValue(Math.max(-1, Math.min(1, pitch.cents / 50)));
+    },
+    [liveNeedleOpacity, liveNeedlePosition],
+  );
+
+  const handleLiveMatch = useCallback(
+    (match: PitchTargetMatch) => {
+      liveTune.setValue(match.inTune ? 1 : 0);
+      Animated.timing(liveProgress, {
+        toValue: match.progress,
+        duration: 100,
+        useNativeDriver: false,
+      }).start();
+      progressPercentRef.current?.setNativeProps({ text: `${Math.round(match.progress * 100)}%` });
+    },
+    [liveProgress, liveTune],
+  );
+
   const detector = usePitchDetector({
     target,
     centsTolerance,
@@ -152,6 +214,8 @@ export function VoicePitchChallenge({
     minFrequencyHz: 70,
     maxFrequencyHz: 1100,
     onInputLevel: handleInputLevel,
+    onPitch: handleLivePitch,
+    onMatch: handleLiveMatch,
     onEvaluated: finish,
   });
 
@@ -175,9 +239,6 @@ export function VoicePitchChallenge({
 
   const isListening = challengeState === 'listening';
   const cents = detector.pitch?.cents ?? 0;
-  const detectedName = detector.pitch
-    ? `${NOTE_NAMES_ES[detector.pitch.noteName] ?? detector.pitch.noteName} (${detector.pitch.label})`
-    : '—';
   const finalEvaluation = detector.evaluation;
 
   return (
@@ -198,40 +259,58 @@ export function VoicePitchChallenge({
           </View>
           <View className="flex-1 rounded-2xl bg-surface-sunken p-3">
             <Text className="text-xs font-bold uppercase tracking-wider text-ink-muted">Detectada</Text>
-            <Text className="mt-1 text-xl font-extrabold text-ink">{detectedName}</Text>
-            <Text className="mt-1 text-2xl font-extrabold tabular-nums text-cyan-700">
-              {detector.pitch ? detector.pitch.frequencyHz.toFixed(1) : '--.-'} Hz
-            </Text>
+            <TextInput
+              ref={detectedNoteRef}
+              editable={false}
+              defaultValue="—"
+              className="mt-1 p-0 text-xl font-extrabold text-ink"
+            />
+            <TextInput
+              ref={frequencyRef}
+              editable={false}
+              defaultValue="--.- Hz"
+              className="mt-1 p-0 text-2xl font-extrabold tabular-nums text-cyan-700"
+            />
           </View>
         </View>
 
         <View className="mt-4">
-          <TunerNeedle cents={cents} visible={detector.pitch !== null} inTune={detector.match.inTune} />
+          <TunerNeedle
+            cents={cents}
+            visible={detector.pitch !== null}
+            inTune={detector.match.inTune}
+            livePosition={liveNeedlePosition}
+            liveOpacity={liveNeedleOpacity}
+            liveTune={liveTune}
+          />
         </View>
         <View className="mt-2 flex-row justify-between">
           <Text className="text-xs text-ink-muted">Grave</Text>
-          <Text
-            className={cn(
-              'text-sm font-extrabold',
-              detector.pitch ? (detector.match.inTune ? 'text-success' : 'text-danger') : 'text-ink-muted',
-            )}
-          >
-            {detector.pitch ? `${cents > 0 ? '+' : ''}${cents} cents` : '—'}
-          </Text>
+          <TextInput
+            ref={centsRef}
+            editable={false}
+            defaultValue="—"
+            className="p-0 text-center text-sm font-extrabold text-ink"
+          />
           <Text className="text-xs text-ink-muted">Agudo</Text>
         </View>
 
         <View className="mt-5">
-          <ProgressBar
-            value={detector.match.progress}
-            label="Muestra de voz para evaluación"
-            fillClassName="bg-cyan-600"
-          />
-          <Text className="mt-2 text-center text-xs font-semibold text-ink-muted">
-            {detector.match.progress > 0
-              ? `Analizando voz · ${Math.round(detector.match.progress * 100)}%`
-              : 'La barra comienza cuando detectemos tu voz'}
-          </Text>
+          <View className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
+            <Animated.View
+              style={{ width: liveProgress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }}
+              className="h-full rounded-full bg-cyan-600"
+            />
+          </View>
+          <View className="mt-2 flex-row items-center justify-center">
+            <Text className="text-xs font-semibold text-ink-muted">Analizando voz · </Text>
+            <TextInput
+              ref={progressPercentRef}
+              editable={false}
+              defaultValue="0%"
+              className="p-0 text-xs font-extrabold text-ink-muted"
+            />
+          </View>
         </View>
       </View>
 
