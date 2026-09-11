@@ -18,6 +18,8 @@ export default function ProfileScreen() {
   const router = useRouter();
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  const deleteAccount = useAuthStore((state) => state.deleteAccount);
+  const isDeletingAccount = useAuthStore((state) => state.isDeletingAccount);
 
   const xp = useProgressStore((state) => state.xp);
   const hearts = useProgressStore((state) => state.hearts);
@@ -37,6 +39,30 @@ export default function ProfileScreen() {
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Reiniciar', style: 'destructive', onPress: resetProgress },
     ]);
+  };
+
+  const confirmDeleteAccount = () => {
+    Alert.alert(
+      'Borrar cuenta',
+      'Se eliminará todo: tu cuenta, perfil, acceso con Google y progreso. Esta acción no se puede deshacer. ¿Seguro que quieres continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sí, borrar cuenta',
+          style: 'destructive',
+          onPress: () => {
+            void deleteAccount()
+              .then(() => router.replace('/login' as Href))
+              .catch((error: unknown) => {
+                Alert.alert(
+                  'No se pudo borrar la cuenta',
+                  error instanceof Error ? error.message : 'Inténtalo nuevamente.',
+                );
+              });
+          },
+        },
+      ],
+    );
   };
 
   return (
@@ -127,10 +153,18 @@ export default function ProfileScreen() {
         <Button
           label="Cerrar sesión"
           variant="secondary"
+          disabled={isDeletingAccount}
           onPress={() => {
             logout();
             router.replace('/login' as Href);
           }}
+        />
+        <Button
+          label={isDeletingAccount ? 'Borrando cuenta…' : 'Borrar cuenta'}
+          variant="danger"
+          disabled={isDeletingAccount}
+          onPress={confirmDeleteAccount}
+          accessibilityHint="Elimina definitivamente tu cuenta y toda su información"
         />
       </View>
     </Screen>
