@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { type Href, useRouter } from 'expo-router';
 import { Alert, Pressable, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
@@ -11,10 +11,13 @@ import { useNextHeartCountdown } from '@/hooks/useHearts';
 import { formatDuration, todayKey } from '@/lib/datetime';
 import { getEffectiveStreak, isStreakAtRisk } from '@/lib/streak';
 import { countCompleted } from '@/lib/unlock';
+import { useAuthStore } from '@/store/authStore';
 import { useCompletedLessonIds, useProgressStore } from '@/store/progressStore';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const xp = useProgressStore((state) => state.xp);
   const hearts = useProgressStore((state) => state.hearts);
@@ -49,6 +52,16 @@ export default function ProfileScreen() {
         >
           <Text className="text-xl text-ink-muted">✕</Text>
         </Pressable>
+      </View>
+
+      <View className="mt-3 flex-row items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
+        <View className="h-12 w-12 items-center justify-center rounded-full bg-brand-soft">
+          <Text className="text-xl">👤</Text>
+        </View>
+        <View className="flex-1">
+          <Text className="text-xs font-bold uppercase tracking-wider text-ink-muted">Usuario</Text>
+          <Text className="mt-0.5 text-lg font-extrabold text-ink">{user?.username}</Text>
+        </View>
       </View>
 
       {atRisk ? (
@@ -111,6 +124,14 @@ export default function ProfileScreen() {
         ) : null}
         {/* Atajo de desarrollo: no debería llegar a producción tal cual. */}
         <Button label="Reiniciar progreso" variant="ghost" onPress={confirmReset} />
+        <Button
+          label="Cerrar sesión"
+          variant="secondary"
+          onPress={() => {
+            logout();
+            router.replace('/login' as Href);
+          }}
+        />
       </View>
     </Screen>
   );

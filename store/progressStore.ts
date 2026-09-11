@@ -7,7 +7,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMemo } from 'react';
 import { create } from 'zustand';
-import { createJSONStorage, persist } from 'zustand/middleware';
+import { createJSONStorage, persist, type PersistStorage } from 'zustand/middleware';
 
 import { todayKey } from '@/lib/datetime';
 import { consumeHeart, createInitialHearts, refillHearts, regenerateHearts } from '@/lib/hearts';
@@ -38,6 +38,14 @@ interface ProgressActions {
 interface ProgressStore extends ProgressSnapshot, ProgressActions {
   hasHydrated: boolean;
 }
+
+const progressStorage = createJSONStorage<ProgressSnapshot>(() => AsyncStorage);
+const silentStorage: PersistStorage<ProgressSnapshot> = {
+  getItem: async () => null,
+  setItem: async () => undefined,
+  removeItem: async () => undefined,
+};
+let activeProgressUserId: string | null = null;
 
 const EMPTY_LESSON_PROGRESS: LessonProgress = {
   completed: false,
@@ -116,7 +124,8 @@ export const useProgressStore = create<ProgressStore>()(
     {
       name: 'edenship-progress',
       version: 1,
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: progressStorage,
+      skipHydration: true,
       // Las acciones y el flag de hidratación no se guardan.
       partialize: ({ xp, hearts, streak, practiceDays, lessons, lastInstrumentId, isPremium }) => ({
         xp,
@@ -135,6 +144,33 @@ export const useProgressStore = create<ProgressStore>()(
     },
   ),
 );
+
+/**
+ * Cambia el namespace persistente antes de cargar el progreso. Durante el
+ * cambio se usa un storage nulo para no sobrescribir los datos del otro alumno.
+ */
+export async function hydrateProgressForUser(userId: string): Promise<void> {
+  if (activeProgressUserId === userId && useProgressStore.getState().hasHydrated) return;
+
+  useProgressStore.persist.setOptions({ storage: silentStorage });
+  useProgressStore.setState({ ...createInitialSnapshot(), hasHydrated: false });
+  useProgressStore.persist.setOptions({
+    name: `edenship-progress:${userId}`,
+    storage: progressStorage,
+  });
+  activeProgressUserId = userId;
+  await useProgressStore.persist.rehydrate();
+  if (!useProgressStore.getState().hasHydrated) {
+    useProgressStore.getState().syncTimeBasedState();
+    useProgressStore.setState({ hasHydrated: true });
+  }
+}
+
+export function unloadProgressUser(): void {
+  activeProgressUserId = null;
+  useProgressStore.persist.setOptions({ storage: silentStorage });
+  useProgressStore.setState({ ...createInitialSnapshot(), hasHydrated: false });
+}
 
 /** Progreso de una lección concreta, con valores por defecto. */
 export function getLessonProgress(lessonId: string): LessonProgress {

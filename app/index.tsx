@@ -10,6 +10,7 @@ import { todayKey } from '@/lib/datetime';
 import { DEVELOPMENT_SECTION_ENABLED } from '@/lib/development';
 import { getEffectiveStreak } from '@/lib/streak';
 import { countCompleted } from '@/lib/unlock';
+import { useAuthStore } from '@/store/authStore';
 import { useCompletedLessonIds, useProgressStore } from '@/store/progressStore';
 import type { InstrumentId } from '@/types/content';
 
@@ -21,6 +22,7 @@ export default function InstrumentSelectorScreen() {
   const streak = useProgressStore((state) => state.streak);
   const setLastInstrument = useProgressStore((state) => state.setLastInstrument);
   const completed = useCompletedLessonIds();
+  const user = useAuthStore((state) => state.user);
 
   const instruments = getInstruments();
   const effectiveStreak = getEffectiveStreak(streak, todayKey());
@@ -44,8 +46,11 @@ export default function InstrumentSelectorScreen() {
             accessibilityRole="button"
             accessibilityLabel="Abrir perfil"
             onPress={() => router.push('/profile')}
-            className="h-9 w-9 items-center justify-center rounded-full bg-white active:bg-slate-200"
+            className="flex-row items-center gap-2 rounded-full bg-white py-2 pl-3 pr-2 active:bg-slate-200"
           >
+            <Text className="max-w-[92px] text-xs font-bold text-ink" numberOfLines={1}>
+              {user?.username}
+            </Text>
             <Text className="text-base">👤</Text>
           </Pressable>
         </View>
