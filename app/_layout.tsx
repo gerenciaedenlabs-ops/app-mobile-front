@@ -69,6 +69,12 @@ export default function RootLayout() {
             <Stack.Screen name="development/voice/index" />
             <Stack.Screen name="development/voice/level" options={{ gestureEnabled: false }} />
             <Stack.Screen name="development/voice/tuner" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="development/guitar/index" />
+            <Stack.Screen name="development/guitar/target" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="development/guitar/tuner" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="development/drums/index" />
+            <Stack.Screen name="development/drums/detector" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="development/drums/rhythm" options={{ gestureEnabled: false }} />
             <Stack.Screen name="profile" options={{ presentation: 'modal' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
           </Stack>
