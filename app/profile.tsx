@@ -4,9 +4,9 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { HeartsBar } from '@/components/HeartsBar';
 import { Screen } from '@/components/Screen';
-import { getCurriculum, getInstruments } from '@/content';
 import { StatTile } from '@/features/profile/StatTile';
 import { StreakCalendar } from '@/features/profile/StreakCalendar';
+import { useCurriculaByInstrument, useInstruments } from '@/hooks/useContent';
 import { useNextHeartCountdown } from '@/hooks/useHearts';
 import { formatDuration, todayKey } from '@/lib/datetime';
 import { getEffectiveStreak, isStreakAtRisk } from '@/lib/streak';
@@ -27,6 +27,9 @@ export default function ProfileScreen() {
   const resetProgress = useProgressStore((state) => state.resetProgress);
   const completed = useCompletedLessonIds();
   const remainingMs = useNextHeartCountdown();
+
+  const instruments = useInstruments();
+  const curricula = useCurriculaByInstrument((instruments.data ?? []).map((instrument) => instrument.id));
 
   const today = todayKey();
   const currentStreak = getEffectiveStreak(streak, today);
@@ -97,8 +100,8 @@ export default function ProfileScreen() {
 
       <Text className="mb-3 mt-6 text-lg font-extrabold text-ink">Por instrumento</Text>
       <View className="gap-2">
-        {getInstruments().map((instrument) => {
-          const curriculum = getCurriculum(instrument.id);
+        {(instruments.data ?? []).map((instrument) => {
+          const curriculum = curricula.data?.[instrument.id] ?? [];
           const total = curriculum.reduce((sum, entry) => sum + entry.lessons.length, 0);
 
           return (
@@ -110,7 +113,7 @@ export default function ProfileScreen() {
               <Text className="flex-1 text-sm font-semibold text-ink">{instrument.name}</Text>
               <Text className="text-xs text-ink-muted">
                 {total === 0
-                  ? 'Sin lecciones'
+                  ? 'Próximamente'
                   : `${countCompleted(curriculum, completed)}/${total} completadas`}
               </Text>
             </View>

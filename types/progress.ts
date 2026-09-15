@@ -1,5 +1,3 @@
-import type { InstrumentId } from './content';
-
 /** Clave de día local en formato YYYY-MM-DD (ver lib/datetime.ts). */
 export type DayKey = string;
 
@@ -16,10 +14,11 @@ export interface HeartsState {
   current: number;
   max: number;
   /**
-   * Momento (epoch ms) desde el que se cuenta la regeneración del próximo corazón.
-   * Se recalcula de forma perezosa; no hay timers persistentes.
+   * ISO de cuándo llega la próxima vida, según el backend, o null si ya
+   * están al máximo. La regeneración la calcula y aplica el backend; el
+   * cliente solo la muestra.
    */
-  lastRegenAt: number;
+  regenerateAt: string | null;
 }
 
 export interface StreakState {
@@ -36,7 +35,7 @@ export interface ProgressSnapshot {
   /** Días con al menos una lección completada, para el calendario del perfil. */
   practiceDays: DayKey[];
   lessons: Record<string, LessonProgress>;
-  lastInstrumentId: InstrumentId | null;
+  lastInstrumentId: string | null;
   /** TODO(RevenueCat): lo poblará el listener de entitlements. */
   isPremium: boolean;
 }

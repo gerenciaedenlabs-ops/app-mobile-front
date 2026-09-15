@@ -13,26 +13,6 @@ export const INITIAL_STREAK: StreakState = {
 };
 
 /**
- * Registra práctica en `day`.
- * - mismo día → no cambia nada (no se acumula por lección)
- * - día siguiente → +1
- * - hueco de 2 o más días → la racha se rompe y vuelve a empezar en 1
- */
-export function registerPractice(streak: StreakState, day: DayKey): StreakState {
-  const gap = streak.lastPracticeDay === null ? null : daysBetween(streak.lastPracticeDay, day);
-
-  if (gap === 0) return streak;
-
-  const current = gap === 1 ? streak.current + 1 : 1;
-
-  return {
-    current,
-    longest: Math.max(streak.longest, current),
-    lastPracticeDay: day,
-  };
-}
-
-/**
  * Racha que ve el usuario HOY. Si no practica hoy la racha sigue viva (aún
  * puede salvarla), pero si el último día practicado es anterior a ayer ya está
  * rota, y hay que mostrar 0 aunque el estado persistido diga otra cosa.

@@ -2,7 +2,8 @@ import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 import { Alert, View } from 'react-native';
 
-import { computeLessonScore, computeXpEarned } from '@/lib/scoring';
+import { computeLessonScore } from '@/lib/scoring';
+import { useAuthStore } from '@/store/authStore';
 import { useProgressStore } from '@/store/progressStore';
 import { useCurrentExercise, useSessionStore } from '@/store/sessionStore';
 import type { Lesson } from '@/types/content';
@@ -14,13 +15,15 @@ import { LessonTopBar } from './LessonTopBar';
 
 interface LessonRunnerProps {
   lesson: Lesson;
+  /** Para volver al árbol correcto desde la pantalla de resultado. */
+  instrumentId?: string;
 }
 
 /**
  * Máquina de la sesión: encadena ejercicios, descuenta vidas y, al terminar,
  * consolida XP y racha antes de navegar al resultado.
  */
-export function LessonRunner({ lesson }: LessonRunnerProps) {
+export function LessonRunner({ lesson, instrumentId }: LessonRunnerProps) {
   const router = useRouter();
 
   const start = useSessionStore((state) => state.start);
@@ -38,6 +41,7 @@ export function LessonRunner({ lesson }: LessonRunnerProps) {
   const loseHeart = useProgressStore((state) => state.loseHeart);
   const completeLesson = useProgressStore((state) => state.completeLesson);
   const registerAttempt = useProgressStore((state) => state.registerAttempt);
+  const token = useAuthStore((state) => state.token);
 
   /** Evita consolidar el progreso dos veces si el efecto se vuelve a ejecutar. */
   const settledRef = useRef(false);
@@ -57,9 +61,9 @@ export function LessonRunner({ lesson }: LessonRunnerProps) {
   const handleResult = useCallback(
     (result: ExerciseResult) => {
       submitResult(result);
-      if (!result.correct) loseHeart();
+      if (!result.correct) void loseHeart(token);
     },
-    [submitResult, loseHeart],
+    [submitResult, loseHeart, token],
   );
 
   const handleContinue = useCallback(() => {
@@ -85,7 +89,7 @@ export function LessonRunner({ lesson }: LessonRunnerProps) {
     ]);
   }, [reset, router]);
 
-  // Fin de sesión: consolidar y navegar al resultado.
+  // Fin de sesión: consolidar contra el backend y navegar al resultado.
   useEffect(() => {
     if (settledRef.current) return;
     if (status !== 'completed' && status !== 'out_of_hearts') return;
@@ -93,21 +97,30 @@ export function LessonRunner({ lesson }: LessonRunnerProps) {
 
     const passed = status === 'completed';
     const score = computeLessonScore(results);
-    const xpEarned = passed ? computeXpEarned(lesson, results) : 0;
 
-    if (passed) completeLesson({ lessonId: lesson.id, xpEarned, score });
+    const goToResult = (xpEarned: number) =>
+      router.replace({
+        pathname: '/lesson/result',
+        params: {
+          lessonTitle: lesson.title,
+          instrumentId: instrumentId ?? '',
+          outcome: passed ? 'passed' : 'failed',
+          xp: String(xpEarned),
+          correct: String(results.filter((result) => result.correct).length),
+          total: String(lesson.exercises.length),
+        },
+      });
 
-    router.replace({
-      pathname: '/lesson/result',
-      params: {
-        lessonId: lesson.id,
-        outcome: passed ? 'passed' : 'failed',
-        xp: String(xpEarned),
-        correct: String(results.filter((result) => result.correct).length),
-        total: String(lesson.exercises.length),
-      },
-    });
-  }, [status, results, lesson, completeLesson, router]);
+    if (!passed) {
+      goToResult(0);
+      return;
+    }
+
+    // El XP real lo otorga y calcula el backend; el cliente solo lo refleja.
+    void completeLesson({ lessonId: lesson.id, score, token }).then(({ xpAwarded }) =>
+      goToResult(xpAwarded ? lesson.xpReward : 0),
+    );
+  }, [status, results, lesson, completeLesson, router, instrumentId, token]);
 
   if (!exercise) return null;
 

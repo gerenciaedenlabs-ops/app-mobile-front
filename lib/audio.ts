@@ -26,8 +26,13 @@ export function isAudioClipKey(key: string): key is AudioClipKey {
   return Object.prototype.hasOwnProperty.call(CLIPS, key);
 }
 
-/** null cuando la clave no existe: el ejercicio muestra un estado de error. */
+/**
+ * null cuando la clave no existe: el ejercicio muestra un estado de error.
+ * Una URL http(s) (como la que manda escuchar_y_elegir del backend) se
+ * reproduce directamente: AudioSource acepta un string como URI remota.
+ */
 export function getAudioClip(key: string): AudioSource | null {
+  if (key.startsWith('http://') || key.startsWith('https://')) return key;
   return isAudioClipKey(key) ? CLIPS[key] : null;
 }
 

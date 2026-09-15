@@ -1,7 +1,6 @@
 /**
- * Puntuación de ejercicios y XP de la lección.
+ * Puntuación de ejercicios de la lección.
  */
-import type { Lesson } from '@/types/content';
 import type { ExerciseResult, RhythmTapExercise } from '@/types/exercise';
 
 export interface TapMatch {
@@ -71,17 +70,4 @@ export function evaluateRhythm(exercise: RhythmTapExercise, tapTimesMs: readonly
 export function computeLessonScore(results: readonly ExerciseResult[]): number {
   if (results.length === 0) return 0;
   return results.reduce((total, result) => total + result.score, 0) / results.length;
-}
-
-export const PERFECT_LESSON_BONUS_XP = 5;
-
-/**
- * XP: el 60 % de la recompensa es por terminar y el 40 % depende de lo bien
- * que se haya hecho. Sin fallos hay bonus.
- */
-export function computeXpEarned(lesson: Lesson, results: readonly ExerciseResult[]): number {
-  const score = computeLessonScore(results);
-  const base = Math.round(lesson.xpReward * (0.6 + 0.4 * score));
-  const flawless = results.length > 0 && results.every((result) => result.correct);
-  return base + (flawless ? PERFECT_LESSON_BONUS_XP : 0);
 }
