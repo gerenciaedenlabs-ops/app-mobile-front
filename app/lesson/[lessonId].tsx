@@ -1,24 +1,31 @@
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
-import { getCurriculum, getLesson, getUnit } from '@/content';
+import { mapApiExercise } from '@/features/lesson/mapExercise';
 import { LessonRunner } from '@/features/lesson/LessonRunner';
-import { formatDuration } from '@/lib/datetime';
-import { getLessonState } from '@/lib/unlock';
 import { useNextHeartCountdown } from '@/hooks/useHearts';
-import { useCompletedLessonIds, useProgressStore } from '@/store/progressStore';
+import { useLessonExercises } from '@/hooks/useContent';
+import { formatDuration } from '@/lib/datetime';
+import { useProgressStore } from '@/store/progressStore';
+import type { Lesson } from '@/types/content';
+
+/** Cuando se entra por deep link sin pasar por el árbol y no se conoce el xpReward real. */
+const FALLBACK_XP_REWARD = 10;
 
 export default function LessonScreen() {
   const router = useRouter();
-  const { lessonId } = useLocalSearchParams<{ lessonId: string }>();
+  const { lessonId, instrumentId, xpReward } = useLocalSearchParams<{
+    lessonId: string;
+    instrumentId?: string;
+    xpReward?: string;
+  }>();
 
   const hearts = useProgressStore((state) => state.hearts);
   const isPremium = useProgressStore((state) => state.isPremium);
-  const completed = useCompletedLessonIds();
   const remainingMs = useNextHeartCountdown();
 
   /**
@@ -29,16 +36,47 @@ export default function LessonScreen() {
   const [enteredWithoutHearts] = useState(() => useProgressStore.getState().hearts.current <= 0);
   const blockedByHearts = enteredWithoutHearts && hearts.current <= 0;
 
-  const lesson = getLesson(lessonId ?? '');
-  const unit = lesson ? getUnit(lesson.unitId) : undefined;
+  const exercisesState = useLessonExercises(lessonId);
+  const lesson = useMemo<Lesson | null>(() => {
+    if (!exercisesState.data) return null;
+    return {
+      id: exercisesState.data.lessonId,
+      // El backend no manda unitId aquí; nada en este flujo lo necesita ya
+      // que instrumentId viaja aparte por el querystring.
+      unitId: '',
+      title: exercisesState.data.lessonTitle,
+      order: 0,
+      // Tampoco manda xpReward: viene del listado de lecciones y se propaga
+      // por querystring desde app/learn/[instrumentId].tsx.
+      xpReward: xpReward ? Number(xpReward) : FALLBACK_XP_REWARD,
+      isPremium: false,
+      requiresMicrophone: false,
+      exercises: exercisesState.data.exercises.map(mapApiExercise),
+    };
+  }, [exercisesState.data, xpReward]);
 
-  if (!lesson || !unit) {
+  if (exercisesState.status === 'loading') {
+    return (
+      <Screen>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#6D28D9" />
+        </View>
+      </Screen>
+    );
+  }
+
+  if (exercisesState.status === 'error') {
+    const notFound = exercisesState.error?.code === 'NOT_FOUND' || exercisesState.error?.status === 404;
     return (
       <Screen>
         <EmptyState
-          icon="🔍"
-          title="Lección no encontrada"
-          description={`No hay ninguna lección con id "${lessonId ?? ''}".`}
+          icon={notFound ? '🔍' : '📡'}
+          title={notFound ? 'Lección no encontrada' : 'No se pudo cargar la lección'}
+          description={
+            notFound
+              ? `No hay ninguna lección con id "${lessonId ?? ''}".`
+              : (exercisesState.error?.message ?? 'Revisa tu conexión e inténtalo de nuevo.')
+          }
           className="flex-1"
         />
         <Button label="Volver" variant="secondary" onPress={() => router.back()} />
@@ -46,11 +84,10 @@ export default function LessonScreen() {
     );
   }
 
-  // El contenido de pago y las lecciones bloqueadas no se abren ni por deep link.
-  if (lesson.isPremium && !isPremium) return <Redirect href="/paywall" />;
+  if (!lesson) return null;
 
-  const state = getLessonState(getCurriculum(unit.instrumentId), completed, lesson.id);
-  if (state === 'locked') return <Redirect href={`/learn/${unit.instrumentId}`} />;
+  // El contenido de pago no se abre ni por deep link (hoy el backend nunca marca lecciones premium).
+  if (lesson.isPremium && !isPremium) return <Redirect href="/paywall" />;
 
   if (blockedByHearts) {
     return (
@@ -75,7 +112,7 @@ export default function LessonScreen() {
 
   return (
     <Screen edges={['top', 'bottom']}>
-      <LessonRunner lesson={lesson} />
+      <LessonRunner lesson={lesson} instrumentId={instrumentId} />
     </Screen>
   );
 }

@@ -2,7 +2,6 @@ import { Pressable, Text, View } from 'react-native';
 
 import { cn } from '@/lib/cn';
 import type { Lesson, LessonState } from '@/types/content';
-import type { ExerciseType } from '@/types/exercise';
 
 interface LessonNodeProps {
   lesson: Lesson;
@@ -13,18 +12,15 @@ interface LessonNodeProps {
   onPress: () => void;
 }
 
-const TYPE_ICONS: Record<ExerciseType, string> = {
-  multiple_choice: '📝',
-  listen_and_choose: '👂',
-  rhythm_tap: '🥁',
-  guitar_detection: '🎤',
-  voice_pitch: '🎙️',
-};
-
-function getNodeIcon(lesson: Lesson, state: LessonState): string {
+/**
+ * El backend no manda el tipo de ejercicio a nivel de lección (una lección
+ * puede mezclar tipos, y solo se sabe al abrir sus ejercicios), así que el
+ * nodo disponible usa un ícono genérico en vez de adivinar el tipo dominante.
+ */
+function getNodeIcon(state: LessonState): string {
   if (state === 'locked') return '🔒';
   if (state === 'completed') return '⭐';
-  return TYPE_ICONS[lesson.exerciseTypes[0] ?? 'multiple_choice'];
+  return '📝';
 }
 
 export function LessonNode({ lesson, state, accentColor, offset, onPress }: LessonNodeProps) {
@@ -54,7 +50,7 @@ export function LessonNode({ lesson, state, accentColor, offset, onPress }: Less
           completed ? 'border-white' : locked ? 'border-slate-300' : 'border-brand-strong',
         )}
       >
-        <Text className="text-3xl">{getNodeIcon(lesson, state)}</Text>
+        <Text className="text-3xl">{getNodeIcon(state)}</Text>
       </Pressable>
 
       <View className="mt-2 max-w-[140px] flex-row items-center gap-1">

@@ -2,11 +2,21 @@ import { type Href, Redirect, useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
 import { Screen } from '@/components/Screen';
-import { getInstruments } from '@/content';
 import { DEVELOPMENT_SECTION_ENABLED } from '@/lib/development';
+import { getInstrumentPresentation } from '@/lib/instrumentPresentation';
+
+/**
+ * Menú puramente decorativo del laboratorio: no depende del currículo real,
+ * solo lista los 4 instrumentos conocidos para elegir qué motor probar.
+ */
+const LAB_INSTRUMENTS = (['guitar', 'piano', 'drums', 'vocals'] as const).map((slug) => ({
+  slug,
+  name: { guitar: 'Guitarra', piano: 'Piano', drums: 'Batería', vocals: 'Voz' }[slug],
+  ...getInstrumentPresentation(slug),
+}));
 
 const DEVELOPMENT_ROUTES: Record<string, string> = {
-  voice: '/development/voice',
+  vocals: '/development/voice',
   guitar: '/development/guitar',
   drums: '/development/drums',
 };
@@ -39,12 +49,12 @@ export default function DevelopmentMenuScreen() {
       </Text>
 
       <View className="mt-6 gap-3">
-        {getInstruments().map((instrument) => {
-          const route = DEVELOPMENT_ROUTES[instrument.id];
+        {LAB_INSTRUMENTS.map((instrument) => {
+          const route = DEVELOPMENT_ROUTES[instrument.slug];
           const available = Boolean(route);
           return (
             <Pressable
-              key={instrument.id}
+              key={instrument.slug}
               accessibilityRole="button"
               accessibilityLabel={`${instrument.name}. ${available ? 'Motor disponible' : 'Motor pendiente'}`}
               accessibilityState={{ disabled: !available }}

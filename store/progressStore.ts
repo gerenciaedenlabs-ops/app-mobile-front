@@ -1,36 +1,56 @@
 /**
  * Estado persistente del alumno: XP, racha, vidas y progreso por lección.
  *
- * Todo lo que sea "regla" (cómo avanza la racha, cómo se regeneran los
- * corazones) vive en lib/ como función pura. El store solo orquesta y guarda.
+ * XP, racha y vidas los calcula y otorga el backend (ver applyRemoteProgress);
+ * el store solo los refleja. Lo que sigue siendo local es el progreso por
+ * lección (completed/bestScore/attempts) y los días de práctica.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type PersistStorage } from 'zustand/middleware';
 
+import { completeLessonProgress, fetchProgress, loseLifeProgress } from '@/lib/content';
 import { todayKey } from '@/lib/datetime';
-import { consumeHeart, createInitialHearts, refillHearts, regenerateHearts } from '@/lib/hearts';
-import { INITIAL_STREAK, registerPractice } from '@/lib/streak';
-import type { InstrumentId } from '@/types/content';
+import { createInitialHearts } from '@/lib/hearts';
+import { INITIAL_STREAK } from '@/lib/streak';
+import type { ApiProgress } from '@/types/api';
 import type { LessonProgress, ProgressSnapshot } from '@/types/progress';
+
+/** Aplica al store el progreso tal como lo devuelve el backend: xp/racha/vidas son suyos. */
+function applyRemoteProgress(remote: ApiProgress): void {
+  useProgressStore.setState((state) => ({
+    xp: remote.xpTotal,
+    hearts: { ...state.hearts, current: remote.lives, max: remote.maxLives, regenerateAt: remote.livesRegenerateAt },
+    streak: {
+      current: remote.currentStreak,
+      longest: remote.longestStreak,
+      lastPracticeDay: remote.lastPracticeDate,
+    },
+  }));
+}
 
 export interface CompleteLessonInput {
   lessonId: string;
-  xpEarned: number;
   /** 0..1 */
   score: number;
+  token: string | null;
+}
+
+export interface CompleteLessonResult {
+  /** true si esta llamada otorgó XP nuevo (false si la lección ya estaba completada, o si falló la red). */
+  xpAwarded: boolean;
 }
 
 interface ProgressActions {
-  /** Recalcula lo que depende del reloj. Llamar al montar y al volver a foreground. */
-  syncTimeBasedState: () => void;
-  loseHeart: () => void;
-  /** TODO(RevenueCat): hoy es gratis; debe exigir compra o esperar al contador. */
+  /** Trae xp/racha/vidas frescos del backend. Llamar al montar y al volver a foreground. */
+  refreshProgress: (token: string | null) => Promise<void>;
+  loseHeart: (token: string | null) => Promise<void>;
+  /** TODO(RevenueCat): hoy es gratis; debe exigir compra o esperar al contador. Solo local: no hay endpoint de recarga. */
   refillAllHearts: () => void;
   registerAttempt: (lessonId: string) => void;
-  completeLesson: (input: CompleteLessonInput) => void;
-  setLastInstrument: (instrumentId: InstrumentId) => void;
+  completeLesson: (input: CompleteLessonInput) => Promise<CompleteLessonResult>;
+  setLastInstrument: (instrumentId: string) => void;
   setPremium: (isPremium: boolean) => void;
   resetProgress: () => void;
 }
@@ -72,14 +92,28 @@ export const useProgressStore = create<ProgressStore>()(
       ...createInitialSnapshot(),
       hasHydrated: false,
 
-      syncTimeBasedState: () => {
-        const synced = regenerateHearts(get().hearts);
-        if (synced !== get().hearts) set({ hearts: synced });
+      refreshProgress: async (token) => {
+        if (!token) return;
+        try {
+          applyRemoteProgress(await fetchProgress(token));
+        } catch {
+          // Sin red o el backend no respondió: se mantiene el estado que había.
+        }
       },
 
-      loseHeart: () => set((state) => ({ hearts: consumeHeart(state.hearts) })),
+      loseHeart: async (token) => {
+        // Feedback inmediato mientras se confirma contra el backend.
+        set((state) => ({ hearts: { ...state.hearts, current: Math.max(0, state.hearts.current - 1) } }));
+        if (!token) return;
+        try {
+          applyRemoteProgress(await loseLifeProgress(token));
+        } catch {
+          // Sin red: se queda con el descuento optimista; se corrige en el próximo refreshProgress.
+        }
+      },
 
-      refillAllHearts: () => set((state) => ({ hearts: refillHearts(state.hearts) })),
+      refillAllHearts: () =>
+        set((state) => ({ hearts: { ...state.hearts, current: state.hearts.max, regenerateAt: null } })),
 
       registerAttempt: (lessonId) =>
         set((state) => {
@@ -92,14 +126,12 @@ export const useProgressStore = create<ProgressStore>()(
           };
         }),
 
-      completeLesson: ({ lessonId, xpEarned, score }) =>
-        set((state) => {
-          const day = todayKey();
-          const previous = state.lessons[lessonId] ?? EMPTY_LESSON_PROGRESS;
+      completeLesson: async ({ lessonId, score, token }) => {
+        const day = todayKey();
+        const previous = get().lessons[lessonId] ?? EMPTY_LESSON_PROGRESS;
 
-          return {
-            xp: state.xp + xpEarned,
-            streak: registerPractice(state.streak, day),
+        const markLessonDone = () =>
+          set((state) => ({
             practiceDays: state.practiceDays.includes(day)
               ? state.practiceDays
               : [...state.practiceDays, day],
@@ -112,8 +144,27 @@ export const useProgressStore = create<ProgressStore>()(
                 completedAt: previous.completedAt ?? new Date().toISOString(),
               },
             },
-          };
-        }),
+          }));
+
+        if (!token) {
+          // Sin sesión no hay a quién otorgarle XP/racha en el backend.
+          markLessonDone();
+          return { xpAwarded: false };
+        }
+
+        try {
+          const { progress, xpAwarded } = await completeLessonProgress(lessonId, token);
+          markLessonDone();
+          applyRemoteProgress(progress);
+          return { xpAwarded };
+        } catch {
+          // Sin red o el backend no respondió: la lección se marca localmente
+          // (para no bloquear el árbol de lecciones) pero XP/racha no avanzan
+          // hasta que se pueda confirmar contra el backend.
+          markLessonDone();
+          return { xpAwarded: false };
+        }
+      },
 
       setLastInstrument: (instrumentId) => set({ lastInstrumentId: instrumentId }),
 
@@ -136,9 +187,7 @@ export const useProgressStore = create<ProgressStore>()(
         lastInstrumentId,
         isPremium,
       }),
-      onRehydrateStorage: () => (state) => {
-        // Los corazones se ponen al día con el tiempo transcurrido con la app cerrada.
-        state?.syncTimeBasedState();
+      onRehydrateStorage: () => () => {
         useProgressStore.setState({ hasHydrated: true });
       },
     },
@@ -148,20 +197,36 @@ export const useProgressStore = create<ProgressStore>()(
 /**
  * Cambia el namespace persistente antes de cargar el progreso. Durante el
  * cambio se usa un storage nulo para no sobrescribir los datos del otro alumno.
+ *
+ * El backend es la única fuente de verdad para xp/racha/vidas: en cada
+ * hidratación se pisan con GET /progress/me, sin importar si ya había un
+ * snapshot local (uno viejo puede traer arrastrado XP/racha calculados
+ * localmente de antes de que existiera el endpoint de escritura). Lo único
+ * que se conserva del snapshot local es lo que el backend no modela aquí:
+ * lecciones completadas, días de práctica, último instrumento y premium.
+ * De ahí en adelante, xp/racha/vidas se mantienen al día llamando a
+ * completeLesson en cada lección terminada (POST /progress/me/lessons/:id/complete).
  */
-export async function hydrateProgressForUser(userId: string): Promise<void> {
+export async function hydrateProgressForUser(userId: string, token: string | null): Promise<void> {
   if (activeProgressUserId === userId && useProgressStore.getState().hasHydrated) return;
+
+  const storageKey = `edenship-progress:${userId}`;
 
   useProgressStore.persist.setOptions({ storage: silentStorage });
   useProgressStore.setState({ ...createInitialSnapshot(), hasHydrated: false });
-  useProgressStore.persist.setOptions({
-    name: `edenship-progress:${userId}`,
-    storage: progressStorage,
-  });
+  useProgressStore.persist.setOptions({ name: storageKey, storage: progressStorage });
   activeProgressUserId = userId;
   await useProgressStore.persist.rehydrate();
+
+  if (token) {
+    try {
+      applyRemoteProgress(await fetchProgress(token));
+    } catch {
+      // Sin red o el backend no respondió: se sigue con los defaults/snapshot local.
+    }
+  }
+
   if (!useProgressStore.getState().hasHydrated) {
-    useProgressStore.getState().syncTimeBasedState();
     useProgressStore.setState({ hasHydrated: true });
   }
 }

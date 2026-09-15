@@ -1,48 +1,52 @@
-import type { Exercise, ExerciseType } from './exercise';
+/**
+ * Modelo de currículo que consume la app, adaptado del contrato real del
+ * backend en lib/content.ts. `instrumentId`/`unitId` no vienen en el JSON del
+ * backend (se infieren del endpoint que se llamó) y se rellenan ahí mismo.
+ */
+import type { Exercise } from './exercise';
 
-export const INSTRUMENT_IDS = ['guitar', 'piano', 'drums', 'voice'] as const;
-
-export type InstrumentId = (typeof INSTRUMENT_IDS)[number];
+/** Slugs reales de la tabla `instrumentos`. Cualquier otro valor cae al genérico. */
+export type InstrumentSlug = 'guitar' | 'piano' | 'drums' | 'vocals';
 
 export interface Instrument {
-  id: InstrumentId;
+  id: string;
+  slug: string;
   name: string;
-  /** Emoji por ahora; sustituible por un set de íconos sin tocar el resto del código. */
+  /** Emoji de presentación local (el backend no manda ícono). */
   icon: string;
-  /** Color de acento del árbol y de los nodos, en hex. */
   accentColor: string;
   tagline: string;
+  order: number;
 }
 
 export interface Unit {
   id: string;
-  instrumentId: InstrumentId;
+  instrumentId: string;
   title: string;
-  /** 1-based y contiguo dentro de cada instrumento. */
+  description: string | null;
   order: number;
-  /** Orden explícito de lecciones; es la fuente de verdad del desbloqueo. */
-  lessonIds: string[];
 }
 
 export interface Lesson {
   id: string;
   unitId: string;
   title: string;
-  /** 1-based dentro de la unidad. Debe coincidir con la posición en Unit.lessonIds. */
   order: number;
   xpReward: number;
-  /** Resumen para pintar el nodo del árbol sin cargar los ejercicios. */
-  exerciseTypes: ExerciseType[];
-  /** true → requiere permiso de micrófono y dev build (no funciona en Expo Go). */
-  requiresMicrophone: boolean;
-  /** true → detrás del paywall. */
+  /** El backend no modela todavía contenido premium ni ejercicios con micrófono. */
   isPremium: boolean;
+  requiresMicrophone: boolean;
+  /**
+   * Vacío para las lecciones del árbol (`GET /units/:unitId/lessons` no los
+   * incluye): se rellena solo al abrir la lección de verdad, con
+   * `GET /lessons/:lessonId/exercises` (ver app/lesson/[lessonId].tsx).
+   */
   exercises: Exercise[];
 }
 
 /**
  * Estado de una lección en el árbol. Es SIEMPRE derivado del progreso:
- * nunca se guarda en el JSON de contenido ni en el store.
+ * nunca se guarda en el backend ni en el store.
  */
 export type LessonState = 'locked' | 'available' | 'completed';
 
