@@ -1,18 +1,18 @@
 import { useRouter } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
+import { EmptyState } from '@/components/EmptyState';
 import { HeartsBar } from '@/components/HeartsBar';
 import { Screen } from '@/components/Screen';
 import { StatPill } from '@/components/StatPill';
-import { getCurriculum, getInstruments } from '@/content';
 import { InstrumentCard } from '@/features/instruments/InstrumentCard';
+import { useCurriculaByInstrument, useInstruments } from '@/hooks/useContent';
 import { todayKey } from '@/lib/datetime';
 import { DEVELOPMENT_SECTION_ENABLED } from '@/lib/development';
 import { getEffectiveStreak } from '@/lib/streak';
 import { countCompleted } from '@/lib/unlock';
 import { useAuthStore } from '@/store/authStore';
 import { useCompletedLessonIds, useProgressStore } from '@/store/progressStore';
-import type { InstrumentId } from '@/types/content';
 
 export default function InstrumentSelectorScreen() {
   const router = useRouter();
@@ -21,13 +21,14 @@ export default function InstrumentSelectorScreen() {
   const hearts = useProgressStore((state) => state.hearts);
   const streak = useProgressStore((state) => state.streak);
   const setLastInstrument = useProgressStore((state) => state.setLastInstrument);
-  const completed = useCompletedLessonIds();
   const user = useAuthStore((state) => state.user);
+  const completed = useCompletedLessonIds();
 
-  const instruments = getInstruments();
+  const instruments = useInstruments();
+  const curricula = useCurriculaByInstrument((instruments.data ?? []).map((instrument) => instrument.id));
   const effectiveStreak = getEffectiveStreak(streak, todayKey());
 
-  const openInstrument = (instrumentId: InstrumentId) => {
+  const openInstrument = (instrumentId: string) => {
     setLastInstrument(instrumentId);
     router.push(`/learn/${instrumentId}`);
   };
@@ -59,22 +60,35 @@ export default function InstrumentSelectorScreen() {
         Puedes llevar varios cursos a la vez. Tu racha cuenta igual en todos.
       </Text>
 
-      <View className="mt-4 gap-3">
-        {instruments.map((instrument) => {
-              const curriculum = getCurriculum(instrument.id);
-              const total = curriculum.reduce((sum, entry) => sum + entry.lessons.length, 0);
+      {instruments.status === 'loading' ? (
+        <View className="mt-8 items-center">
+          <ActivityIndicator size="large" color="#6D28D9" />
+        </View>
+      ) : instruments.status === 'error' ? (
+        <EmptyState
+          icon="📡"
+          title="No se pudieron cargar los instrumentos"
+          description={instruments.error?.message ?? 'Revisa tu conexión e inténtalo de nuevo.'}
+          className="mt-4"
+        />
+      ) : (
+        <View className="mt-4 gap-3">
+          {(instruments.data ?? []).map((instrument) => {
+            const curriculum = curricula.data?.[instrument.id] ?? [];
+            const totalLessons = curriculum.reduce((sum, entry) => sum + entry.lessons.length, 0);
 
-              return (
-                <InstrumentCard
-                  key={instrument.id}
-                  instrument={instrument}
-                  completedLessons={countCompleted(curriculum, completed)}
-                  totalLessons={total}
-                  onPress={() => openInstrument(instrument.id)}
-                />
-              );
-            })}
-      </View>
+            return (
+              <InstrumentCard
+                key={instrument.id}
+                instrument={instrument}
+                completedLessons={countCompleted(curriculum, completed)}
+                totalLessons={totalLessons}
+                onPress={() => openInstrument(instrument.id)}
+              />
+            );
+          })}
+        </View>
+      )}
 
       <Pressable
         accessibilityRole="button"

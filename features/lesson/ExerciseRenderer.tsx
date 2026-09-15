@@ -3,6 +3,7 @@ import { GuitarDetectionExercise } from './exercises/GuitarDetectionExercise';
 import { ListenAndChooseExercise } from './exercises/ListenAndChooseExercise';
 import { MultipleChoiceExercise } from './exercises/MultipleChoiceExercise';
 import { RhythmTapExercise } from './exercises/RhythmTapExercise';
+import { UnsupportedExercise } from './exercises/UnsupportedExercise';
 import { VoicePitchExercise } from './exercises/VoicePitchExercise';
 
 /**
@@ -23,5 +24,7 @@ export function ExerciseRenderer({ exercise, result, onResult }: ExerciseCompone
       return <GuitarDetectionExercise exercise={exercise} result={result} onResult={onResult} />;
     case 'voice_pitch':
       return <VoicePitchExercise exercise={exercise} result={result} onResult={onResult} />;
+    case 'unsupported':
+      return <UnsupportedExercise exercise={exercise} result={result} onResult={onResult} />;
   }
 }

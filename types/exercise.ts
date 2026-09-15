@@ -111,12 +111,24 @@ export interface VoicePitchExercise extends ExerciseBase {
   timeoutMs: number;
 }
 
+/**
+ * Tipo del backend sin `data` documentada todavía (ritmo_toque, deteccion_guitarra,
+ * emparejar, banco_palabras, dictado). Se muestra como "no soportado" en vez de
+ * adivinar su forma.
+ */
+export interface UnsupportedExercise extends ExerciseBase {
+  type: 'unsupported';
+  /** Nombre legible del tipo real, para mostrarlo en el placeholder. */
+  typeName: string;
+}
+
 export type Exercise =
   | MultipleChoiceExercise
   | ListenAndChooseExercise
   | RhythmTapExercise
   | GuitarDetectionExercise
-  | VoicePitchExercise;
+  | VoicePitchExercise
+  | UnsupportedExercise;
 
 /** Resultado de un ejercicio resuelto dentro de una sesión. */
 export interface ExerciseResult {

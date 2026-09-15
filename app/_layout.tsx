@@ -22,6 +22,7 @@ export default function RootLayout() {
   const currentSegment = segments[0] as string | undefined;
   const authHasHydrated = useAuthStore((state) => state.hasHydrated);
   const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
   const hasHydrated = useProgressStore((state) => state.hasHydrated);
 
   // Pone al día los corazones al abrir y al volver a primer plano.
@@ -42,14 +43,14 @@ export default function RootLayout() {
       return;
     }
 
-    void hydrateProgressForUser(user.id).then(() => {
+    void hydrateProgressForUser(user.id, token).then(() => {
       if (!cancelled && currentSegment === 'login') router.replace('/');
     });
 
     return () => {
       cancelled = true;
     };
-  }, [authHasHydrated, user, router, currentSegment]);
+  }, [authHasHydrated, user, token, router, currentSegment]);
 
   // TODO(OneSignal): inicializar el SDK aquí y pedir permiso de notificaciones
   // tras la primera lección completada, no en el arranque en frío.

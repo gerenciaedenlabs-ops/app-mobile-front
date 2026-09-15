@@ -1,13 +1,13 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Text, View } from 'react-native';
 
 import { EmptyState } from '@/components/EmptyState';
 import { HeartsBar } from '@/components/HeartsBar';
 import { Screen } from '@/components/Screen';
 import { StatPill } from '@/components/StatPill';
-import { getCurriculum, getInstrument } from '@/content';
 import { UnitSection } from '@/features/skill-tree/UnitSection';
+import { useCurriculum, useInstruments } from '@/hooks/useContent';
 import { formatDuration, todayKey } from '@/lib/datetime';
 import { msUntilNextHeart } from '@/lib/hearts';
 import { getEffectiveStreak } from '@/lib/streak';
@@ -25,12 +25,37 @@ export default function SkillTreeScreen() {
   const isPremium = useProgressStore((state) => state.isPremium);
   const completed = useCompletedLessonIds();
 
-  const instrument = getInstrument(instrumentId ?? '');
-  const curriculum = useMemo(
-    () => (instrument ? getCurriculum(instrument.id) : []),
-    [instrument],
-  );
+  // La lista completa ya está en caché de la pantalla anterior en la práctica,
+  // pero se vuelve a pedir aquí para que el deep link a /learn/:id funcione solo.
+  const instruments = useInstruments();
+  const instrument = instruments.data?.find((candidate) => candidate.id === instrumentId);
+
+  const curriculumState = useCurriculum(instrumentId);
+  const curriculum = curriculumState.data ?? [];
   const tree = useMemo(() => buildTree(curriculum, completed), [curriculum, completed]);
+
+  if (instruments.status === 'loading') {
+    return (
+      <Screen>
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#6D28D9" />
+        </View>
+      </Screen>
+    );
+  }
+
+  if (instruments.status === 'error') {
+    return (
+      <Screen>
+        <EmptyState
+          icon="📡"
+          title="No se pudo cargar el instrumento"
+          description={instruments.error?.message ?? 'Revisa tu conexión e inténtalo de nuevo.'}
+          className="flex-1"
+        />
+      </Screen>
+    );
+  }
 
   if (!instrument) {
     return (
@@ -66,7 +91,7 @@ export default function SkillTreeScreen() {
       return;
     }
 
-    router.push(`/lesson/${lesson.id}`);
+    router.push(`/lesson/${lesson.id}?instrumentId=${instrument.id}&xpReward=${lesson.xpReward}`);
   };
 
   return (
@@ -109,11 +134,21 @@ export default function SkillTreeScreen() {
         <Text className="text-xl text-ink-muted">⌄</Text>
       </Pressable>
 
-      {tree.length === 0 ? (
+      {curriculumState.status === 'loading' ? (
+        <View className="items-center py-12">
+          <ActivityIndicator size="large" color="#6D28D9" />
+        </View>
+      ) : curriculumState.status === 'error' ? (
+        <EmptyState
+          icon="📡"
+          title="No se pudo cargar el curso"
+          description={curriculumState.error?.message ?? 'Revisa tu conexión e inténtalo de nuevo.'}
+        />
+      ) : tree.length === 0 ? (
         <EmptyState
           icon="🚧"
-          title="Aún no hay lecciones"
-          description={`El contenido de ${instrument.name.toLowerCase()} está en camino.`}
+          title="Próximamente"
+          description={`Estamos preparando el curso de ${instrument.name.toLowerCase()}.`}
         />
       ) : (
         tree.map((unitTree) => (

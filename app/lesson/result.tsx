@@ -4,7 +4,6 @@ import { Text, View } from 'react-native';
 import { Button } from '@/components/Button';
 import { HeartsBar } from '@/components/HeartsBar';
 import { Screen } from '@/components/Screen';
-import { getLesson, getUnit } from '@/content';
 import { StatTile } from '@/features/profile/StatTile';
 import { todayKey } from '@/lib/datetime';
 import { getEffectiveStreak, hasPracticedToday } from '@/lib/streak';
@@ -13,7 +12,8 @@ import { useProgressStore } from '@/store/progressStore';
 export default function LessonResultScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{
-    lessonId: string;
+    lessonTitle: string;
+    instrumentId: string;
     outcome: string;
     xp: string;
     correct: string;
@@ -28,13 +28,11 @@ export default function LessonResultScreen() {
   const correct = Number(params.correct ?? 0);
   const total = Number(params.total ?? 0);
 
-  const lesson = getLesson(params.lessonId ?? '');
-  const unit = lesson ? getUnit(lesson.unitId) : undefined;
   const today = todayKey();
   const currentStreak = getEffectiveStreak(streak, today);
 
   const goToTree = () => {
-    if (unit) router.replace(`/learn/${unit.instrumentId}`);
+    if (params.instrumentId) router.replace(`/learn/${params.instrumentId}`);
     else router.replace('/');
   };
 
@@ -48,7 +46,7 @@ export default function LessonResultScreen() {
           {passed ? '¡Práctica completada!' : 'Te quedaste sin vidas'}
         </Text>
         <Text className="mt-2 text-center text-sm text-ink-muted">
-          {lesson?.title ?? 'Lección'} · {correct} de {total} aciertos
+          {params.lessonTitle || 'Lección'} · {correct} de {total} aciertos
         </Text>
 
         <View className="mt-8 w-full flex-row gap-2">
