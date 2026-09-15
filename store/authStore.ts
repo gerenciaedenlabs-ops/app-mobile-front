@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 import { ApiError, apiRequest } from '@/lib/api';
+import { unloadProgressUser } from '@/store/progressStore';
 
 export interface AuthUser {
   id: string;
@@ -25,8 +26,10 @@ interface AuthStore {
   user: AuthUser | null;
   hasHydrated: boolean;
   isLoggingIn: boolean;
+  isDeletingAccount: boolean;
   login: (identifier: string, password: string) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   logout: () => void;
 }
 
@@ -37,6 +40,7 @@ export const useAuthStore = create<AuthStore>()(
       user: null,
       hasHydrated: false,
       isLoggingIn: false,
+      isDeletingAccount: false,
 
       login: async (identifier, password) => {
         set({ isLoggingIn: true });
@@ -66,7 +70,28 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      logout: () => set({ token: null, user: null, isLoggingIn: false }),
+      deleteAccount: async () => {
+        const { token, user } = useAuthStore.getState();
+        if (!token || !user) throw new ApiError('No hay una sesión activa.', 401);
+
+        set({ isDeletingAccount: true });
+        try {
+          await apiRequest<{ deleted: true }>('auth/account', {
+            method: 'DELETE',
+            token,
+            body: JSON.stringify({ confirmation: 'DELETE_MY_ACCOUNT' }),
+          });
+          await AsyncStorage.removeItem(`edenship-progress:${user.id}`).catch(() => undefined);
+          unloadProgressUser();
+          set({ token: null, user: null, isLoggingIn: false, isDeletingAccount: false });
+        } catch (error) {
+          set({ isDeletingAccount: false });
+          throw error;
+        }
+      },
+
+      logout: () =>
+        set({ token: null, user: null, isLoggingIn: false, isDeletingAccount: false }),
     }),
     {
       name: 'edenship-auth',

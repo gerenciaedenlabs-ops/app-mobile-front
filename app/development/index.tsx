@@ -1,4 +1,4 @@
-import { Redirect, useRouter } from 'expo-router';
+import { type Href, Redirect, useRouter } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 
 import { Screen } from '@/components/Screen';
@@ -14,6 +14,12 @@ const LAB_INSTRUMENTS = (['guitar', 'piano', 'drums', 'vocals'] as const).map((s
   name: { guitar: 'Guitarra', piano: 'Piano', drums: 'Batería', vocals: 'Voz' }[slug],
   ...getInstrumentPresentation(slug),
 }));
+
+const DEVELOPMENT_ROUTES: Record<string, string> = {
+  vocals: '/development/voice',
+  guitar: '/development/guitar',
+  drums: '/development/drums',
+};
 
 export default function DevelopmentMenuScreen() {
   const router = useRouter();
@@ -44,7 +50,8 @@ export default function DevelopmentMenuScreen() {
 
       <View className="mt-6 gap-3">
         {LAB_INSTRUMENTS.map((instrument) => {
-          const available = instrument.slug === 'vocals';
+          const route = DEVELOPMENT_ROUTES[instrument.slug];
+          const available = Boolean(route);
           return (
             <Pressable
               key={instrument.slug}
@@ -52,7 +59,7 @@ export default function DevelopmentMenuScreen() {
               accessibilityLabel={`${instrument.name}. ${available ? 'Motor disponible' : 'Motor pendiente'}`}
               accessibilityState={{ disabled: !available }}
               disabled={!available}
-              onPress={() => router.push('/development/voice')}
+              onPress={() => route && router.push(route as Href)}
               className="flex-row items-center gap-4 rounded-2xl border-2 border-slate-200 bg-white p-4 active:bg-surface-sunken disabled:opacity-50"
             >
               <View
