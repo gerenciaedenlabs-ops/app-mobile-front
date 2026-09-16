@@ -76,6 +76,9 @@ export default function RootLayout() {
             <Stack.Screen name="development/drums/index" />
             <Stack.Screen name="development/drums/detector" options={{ gestureEnabled: false }} />
             <Stack.Screen name="development/drums/rhythm" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="development/piano/index" />
+            <Stack.Screen name="development/piano/target" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="development/piano/detector" options={{ gestureEnabled: false }} />
             <Stack.Screen name="profile" options={{ presentation: 'modal' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
           </Stack>

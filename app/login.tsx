@@ -5,6 +5,7 @@ import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-nat
 
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
+import GoogleIcon from '@/assets/icon/google-icon.svg';
 import { ApiError } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
@@ -122,7 +123,7 @@ export default function LoginScreen() {
 
           <Button
             label={isOpeningGoogle || isLoggingIn ? 'Conectando…' : 'Continuar con Google'}
-            icon="G"
+            icon={<GoogleIcon width={24} height={24} />}
             variant="secondary"
             disabled={!googleRequest || busy}
             onPress={() => void startGoogleLogin()}
