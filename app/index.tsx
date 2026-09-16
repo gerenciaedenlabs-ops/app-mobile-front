@@ -92,13 +92,13 @@ export default function InstrumentSelectorScreen() {
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Ver EdenShip Premium"
+        accessibilityLabel="Ver Ritmo Premium"
         onPress={() => router.push('/paywall')}
         className="mt-8 flex-row items-center gap-3 rounded-2xl bg-ink p-4 active:opacity-90"
       >
         <Text className="text-2xl">👑</Text>
         <View className="flex-1">
-          <Text className="text-base font-extrabold text-white">EdenShip Premium</Text>
+          <Text className="text-base font-extrabold text-white">Ritmo Premium</Text>
           <Text className="text-xs text-white/70">Vidas infinitas y todas las unidades</Text>
         </View>
         <Text className="text-white/70">›</Text>
