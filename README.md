@@ -1,4 +1,4 @@
-# EdenShip — app móvil para aprender música
+# Ritmo — app móvil para aprender música
 
 App estilo Duolingo para aprender **guitarra, piano, batería y voz**: árbol de lecciones por
 instrumento, XP, racha diaria y sistema de vidas.
@@ -98,7 +98,7 @@ grabaciones reales manteniendo los mismos nombres de archivo, o registra nuevas 
 | Área | Estado | Dónde |
 | --- | --- | --- |
 | **Detección de guitarra** | Mock: simula una lectura que converge al objetivo | [hooks/useGuitarPitchDetector.ts](hooks/useGuitarPitchDetector.ts) |
-| **RevenueCat** | Sin SDK. Planes y precios escritos a mano; "Suscribirse" simula la compra | [app/paywall.tsx](app/paywall.tsx), `setPremium` en [store/progressStore.ts](store/progressStore.ts) |
+| **RevenueCat** | Conectado con SDK (`react-native-purchases`). Entitlement `ritmo_pro`, paywall nativo y restauración | [lib/purchases.ts](lib/purchases.ts), [app/paywall.tsx](app/paywall.tsx), [app/_layout.tsx](app/_layout.tsx) |
 | **OneSignal** | Sin SDK. Punto de inicialización marcado | [app/\_layout.tsx](app/_layout.tsx) |
 | **Backend** | Sin API. El currículo se carga de JSON local | [content/index.ts](content/index.ts) |
 | **Audio real** | WAV sintéticos | [scripts/generate-placeholder-audio.mjs](scripts/generate-placeholder-audio.mjs) |

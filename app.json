@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "EdenShip",
-    "slug": "edenship",
+    "name": "Ritmo",
+    "slug": "ritmo",
     "version": "0.1.0",
     "orientation": "portrait",
-    "scheme": "edenship",
+    "scheme": "ritmo",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.edenlabs.edenship"
+      "bundleIdentifier": "com.edenlabs.ritmo"
     },
     "android": {
-      "package": "com.edenlabs.edenship",
+      "package": "com.edenlabs.ritmo",
       "edgeToEdgeEnabled": true
     },
     "plugins": [
@@ -21,7 +21,7 @@
       [
         "expo-audio",
         {
-          "microphonePermission": "EdenShip usa el micrófono para detectar la afinación de tu voz o instrumento y darte feedback en tiempo real."
+          "microphonePermission": "Ritmo usa el micrófono para detectar la afinación de tu voz o instrumento y darte feedback en tiempo real."
         }
       ],
       "expo-web-browser"

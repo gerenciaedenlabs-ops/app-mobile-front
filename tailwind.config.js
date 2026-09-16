@@ -12,7 +12,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Paleta base de EdenShip. Los acentos por instrumento viven en content/instruments.json.
+        // Paleta base de Ritmo. Los acentos por instrumento viven en content/instruments.json.
         ink: {
           DEFAULT: '#0F172A',
           soft: '#334155',
