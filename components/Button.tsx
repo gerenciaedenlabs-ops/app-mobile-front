@@ -1,3 +1,4 @@
+import { type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { cn } from '@/lib/cn';
@@ -11,8 +12,8 @@ interface ButtonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
   disabled?: boolean;
-  /** Emoji o carácter que se pinta antes del texto. */
-  icon?: string;
+  /** Emoji, carácter o elemento gráfico que se pinta antes del texto. */
+  icon?: ReactNode;
   className?: string;
   accessibilityHint?: string;
 }
@@ -65,7 +66,11 @@ export function Button({
       )}
     >
       <View className="flex-row items-center gap-2">
-        {icon ? <Text className="text-lg">{icon}</Text> : null}
+        {typeof icon === 'string' ? (
+          <Text className="text-lg">{icon}</Text>
+        ) : icon ? (
+          <View className="h-6 w-6 items-center justify-center">{icon}</View>
+        ) : null}
         <Text
           className={cn(
             'text-center font-bold tracking-wide',
