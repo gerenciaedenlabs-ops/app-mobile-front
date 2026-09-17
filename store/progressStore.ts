@@ -1,20 +1,24 @@
 /**
  * Estado persistente del alumno: XP, racha, vidas y progreso por lección.
  *
- * XP, racha y vidas los calcula y otorga el backend (ver applyRemoteProgress);
- * el store solo los refleja. Lo que sigue siendo local es el progreso por
- * lección (completed/bestScore/attempts) y los días de práctica.
+ * XP, racha, vidas, gemas, calendario de actividad (últimos 30 días) y
+ * progreso por instrumento los calcula el backend (ver applyRemoteSummary,
+ * GET /progress/me/summary); el store solo los refleja y los cachea
+ * localmente para que la app tenga algo que mostrar al abrir sin red. Lo que
+ * sigue siendo puramente local es el progreso por lección
+ * (completed/bestScore/attempts) y el instrumento seleccionado
+ * (lastInstrumentId): preferencia de UI, sin endpoint de backend.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import { createJSONStorage, persist, type PersistStorage } from 'zustand/middleware';
 
-import { completeLessonProgress, fetchProgress, loseLifeProgress } from '@/lib/content';
+import { completeLessonProgress, fetchProgressSummary, loseLifeProgress } from '@/lib/content';
 import { todayKey } from '@/lib/datetime';
 import { createInitialHearts } from '@/lib/hearts';
 import { INITIAL_STREAK } from '@/lib/streak';
-import type { ApiProgress } from '@/types/api';
+import type { ApiProgress, ApiProgressSummary } from '@/types/api';
 import type { LessonProgress, ProgressSnapshot } from '@/types/progress';
 
 /** Aplica al store el progreso tal como lo devuelve el backend: xp/racha/vidas son suyos. */
@@ -27,6 +31,27 @@ function applyRemoteProgress(remote: ApiProgress): void {
       longest: remote.longestStreak,
       lastPracticeDay: remote.lastPracticeDate,
     },
+  }));
+}
+
+/**
+ * Aplica al store el resumen agregado de GET /progress/me/summary: xp/racha/
+ * vidas (igual que applyRemoteProgress) más gemas, calendario de actividad
+ * (últimos 30 días) y progreso por instrumento, todo en un solo request.
+ */
+function applyRemoteSummary(remote: ApiProgressSummary): void {
+  useProgressStore.setState((state) => ({
+    xp: remote.xpTotal,
+    gems: remote.gems,
+    hearts: { ...state.hearts, current: remote.lives, max: remote.maxLives, regenerateAt: remote.livesRegenerateAt },
+    streak: {
+      current: remote.currentStreak,
+      longest: remote.longestStreak,
+      lastPracticeDay: remote.lastPracticeDate,
+    },
+    practiceDays: remote.activeDates,
+    totalLessonsCompleted: remote.totalLessonsCompleted,
+    progressByInstrument: remote.progressByInstrument,
   }));
 }
 
@@ -77,9 +102,12 @@ const EMPTY_LESSON_PROGRESS: LessonProgress = {
 function createInitialSnapshot(): ProgressSnapshot {
   return {
     xp: 0,
+    gems: 0,
     hearts: createInitialHearts(),
     streak: INITIAL_STREAK,
     practiceDays: [],
+    totalLessonsCompleted: 0,
+    progressByInstrument: [],
     lessons: {},
     lastInstrumentId: null,
     isPremium: false,
@@ -95,7 +123,7 @@ export const useProgressStore = create<ProgressStore>()(
       refreshProgress: async (token) => {
         if (!token) return;
         try {
-          applyRemoteProgress(await fetchProgress(token));
+          applyRemoteSummary(await fetchProgressSummary(token));
         } catch {
           // Sin red o el backend no respondió: se mantiene el estado que había.
         }
@@ -178,11 +206,25 @@ export const useProgressStore = create<ProgressStore>()(
       storage: progressStorage,
       skipHydration: true,
       // Las acciones y el flag de hidratación no se guardan.
-      partialize: ({ xp, hearts, streak, practiceDays, lessons, lastInstrumentId, isPremium }) => ({
+      partialize: ({
         xp,
+        gems,
         hearts,
         streak,
         practiceDays,
+        totalLessonsCompleted,
+        progressByInstrument,
+        lessons,
+        lastInstrumentId,
+        isPremium,
+      }) => ({
+        xp,
+        gems,
+        hearts,
+        streak,
+        practiceDays,
+        totalLessonsCompleted,
+        progressByInstrument,
         lessons,
         lastInstrumentId,
         isPremium,
@@ -198,13 +240,14 @@ export const useProgressStore = create<ProgressStore>()(
  * Cambia el namespace persistente antes de cargar el progreso. Durante el
  * cambio se usa un storage nulo para no sobrescribir los datos del otro alumno.
  *
- * El backend es la única fuente de verdad para xp/racha/vidas: en cada
- * hidratación se pisan con GET /progress/me, sin importar si ya había un
- * snapshot local (uno viejo puede traer arrastrado XP/racha calculados
- * localmente de antes de que existiera el endpoint de escritura). Lo único
- * que se conserva del snapshot local es lo que el backend no modela aquí:
- * lecciones completadas, días de práctica, último instrumento y premium.
- * De ahí en adelante, xp/racha/vidas se mantienen al día llamando a
+ * El backend es la única fuente de verdad para xp/racha/vidas/gemas/
+ * calendario de actividad/progreso por instrumento: en cada hidratación se
+ * pisan con GET /progress/me/summary, sin importar si ya había un snapshot
+ * local (uno viejo puede traer arrastrado XP/racha calculados localmente de
+ * antes de que existiera el endpoint de escritura). Lo único que se
+ * conserva del snapshot local es lo que el backend no modela: lecciones
+ * completadas (para no bloquear el árbol offline), último instrumento y
+ * premium. De ahí en adelante, xp/racha/vidas se mantienen al día llamando a
  * completeLesson en cada lección terminada (POST /progress/me/lessons/:id/complete).
  */
 export async function hydrateProgressForUser(userId: string, token: string | null): Promise<void> {
@@ -220,7 +263,7 @@ export async function hydrateProgressForUser(userId: string, token: string | nul
 
   if (token) {
     try {
-      applyRemoteProgress(await fetchProgress(token));
+      applyRemoteSummary(await fetchProgressSummary(token));
     } catch {
       // Sin red o el backend no respondió: se sigue con los defaults/snapshot local.
     }
