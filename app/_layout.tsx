@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useHeartsSync } from '@/hooks/useHearts';
+import { configurePurchases, syncPurchasesUser } from '@/lib/purchases';
 import { useAuthStore } from '@/store/authStore';
 import {
   hydrateProgressForUser,
@@ -31,11 +32,16 @@ export default function RootLayout() {
   useEffect(() => {
     // Sin esto el audio no suena en iOS con el interruptor de silencio activado.
     void setAudioModeAsync({ playsInSilentMode: true });
+    // Inicializa RevenueCat con nivel VERBOSE y llaves por plataforma
+    configurePurchases();
   }, []);
 
   useEffect(() => {
     if (!authHasHydrated) return;
     let cancelled = false;
+
+    // Sincroniza usuario con RevenueCat
+    void syncPurchasesUser(user?.id ?? null);
 
     if (!user) {
       unloadProgressUser();
@@ -76,6 +82,9 @@ export default function RootLayout() {
             <Stack.Screen name="development/drums/index" />
             <Stack.Screen name="development/drums/detector" options={{ gestureEnabled: false }} />
             <Stack.Screen name="development/drums/rhythm" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="development/piano/index" />
+            <Stack.Screen name="development/piano/target" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="development/piano/detector" options={{ gestureEnabled: false }} />
             <Stack.Screen name="profile" options={{ presentation: 'modal' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
           </Stack>

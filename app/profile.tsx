@@ -10,6 +10,7 @@ import { StreakCalendar } from '@/features/profile/StreakCalendar';
 import { useInstruments } from '@/hooks/useContent';
 import { useNextHeartCountdown } from '@/hooks/useHearts';
 import { formatDuration, todayKey } from '@/lib/datetime';
+import { presentCustomerCenter } from '@/lib/purchases';
 import { getEffectiveStreak, isStreakAtRisk } from '@/lib/streak';
 import { useAuthStore } from '@/store/authStore';
 import { useProgressStore } from '@/store/progressStore';
@@ -165,7 +166,15 @@ export default function ProfileScreen() {
       <View className="mt-8 gap-3">
         {!isPremium ? (
           <Button label="Hazte Premium" icon="👑" onPress={() => router.push('/paywall')} />
-        ) : null}
+        ) : (
+          <Button
+            label="Gestionar suscripción"
+            icon="⚙️"
+            variant="secondary"
+            onPress={() => void presentCustomerCenter()}
+            accessibilityHint="Abre el centro de ayuda y gestión de suscripción de RevenueCat"
+          />
+        )}
         {/* Atajo de desarrollo: no debería llegar a producción tal cual. */}
         <Button label="Reiniciar progreso" variant="ghost" onPress={confirmReset} />
         <Button

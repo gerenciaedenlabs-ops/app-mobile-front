@@ -19,6 +19,7 @@ const DEVELOPMENT_ROUTES: Record<string, string> = {
   vocals: '/development/voice',
   guitar: '/development/guitar',
   drums: '/development/drums',
+  piano: '/development/piano',
 };
 
 export default function DevelopmentMenuScreen() {

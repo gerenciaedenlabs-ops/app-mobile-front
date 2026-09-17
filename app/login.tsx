@@ -5,6 +5,7 @@ import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-nat
 
 import { Button } from '@/components/Button';
 import { Screen } from '@/components/Screen';
+import GoogleIcon from '@/assets/icon/google-icon.svg';
 import { ApiError } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 
@@ -34,7 +35,7 @@ export default function LoginScreen() {
       scopes: ['openid', 'email', 'profile'],
       selectAccount: true,
     },
-    { scheme: 'edenship', path: 'oauth/google' },
+    { scheme: 'ritmo', path: 'oauth/google' },
   );
 
   useEffect(() => {
@@ -110,19 +111,19 @@ export default function LoginScreen() {
           <View className="h-20 w-20 items-center justify-center rounded-3xl bg-brand-soft">
             <Text className="text-4xl">🎵</Text>
           </View>
-          <Text className="mt-5 text-4xl font-extrabold text-ink">EdenShip</Text>
+          <Text className="mt-5 text-4xl font-extrabold text-ink">Ritmo</Text>
           <Text className="mt-2 text-center text-sm text-ink-muted">
             Aprende música, una lección a la vez.
           </Text>
         </View>
 
         <View className="mt-8 rounded-3xl bg-white p-5">
-          <Text className="text-2xl font-extrabold text-ink">Iniciar sesión</Text>
-          <Text className="mt-1 text-sm text-ink-muted">Continúa con tu cuenta de Google.</Text>
+          <Text className="text-2xl font-extrabold text-ink">Iniciar sesión / Registrarse</Text>
+          <Text className="mt-1 text-sm text-ink-muted">Continúa con tu cuenta de Google o tu correo electrónico.</Text>
 
           <Button
             label={isOpeningGoogle || isLoggingIn ? 'Conectando…' : 'Continuar con Google'}
-            icon="G"
+            icon={<GoogleIcon width={24} height={24} />}
             variant="secondary"
             disabled={!googleRequest || busy}
             onPress={() => void startGoogleLogin()}
@@ -160,7 +161,7 @@ export default function LoginScreen() {
                 keyboardType="email-address"
                 textContentType="username"
                 returnKeyType="next"
-                placeholder="deymer o deymer@edenship.test"
+                placeholder="deymer o deymer@ritmo.test"
                 className="h-14 rounded-2xl border-2 border-slate-200 bg-surface-sunken px-4 text-base text-ink"
               />
 

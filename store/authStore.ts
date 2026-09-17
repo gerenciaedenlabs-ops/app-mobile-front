@@ -81,7 +81,7 @@ export const useAuthStore = create<AuthStore>()(
             token,
             body: JSON.stringify({ confirmation: 'DELETE_MY_ACCOUNT' }),
           });
-          await AsyncStorage.removeItem(`edenship-progress:${user.id}`).catch(() => undefined);
+          await AsyncStorage.removeItem(`ritmo-progress:${user.id}`).catch(() => undefined);
           unloadProgressUser();
           set({ token: null, user: null, isLoggingIn: false, isDeletingAccount: false });
         } catch (error) {
@@ -94,7 +94,7 @@ export const useAuthStore = create<AuthStore>()(
         set({ token: null, user: null, isLoggingIn: false, isDeletingAccount: false }),
     }),
     {
-      name: 'edenship-auth',
+      name: 'ritmo-auth',
       storage: createJSONStorage(() => AsyncStorage),
       partialize: ({ token, user }) => ({ token, user }) as AuthStore,
       onRehydrateStorage: () => (state) => {

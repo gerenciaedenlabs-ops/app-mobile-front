@@ -201,7 +201,7 @@ export const useProgressStore = create<ProgressStore>()(
       resetProgress: () => set(createInitialSnapshot()),
     }),
     {
-      name: 'edenship-progress',
+      name: 'ritmo-progress',
       version: 1,
       storage: progressStorage,
       skipHydration: true,
@@ -253,7 +253,7 @@ export const useProgressStore = create<ProgressStore>()(
 export async function hydrateProgressForUser(userId: string, token: string | null): Promise<void> {
   if (activeProgressUserId === userId && useProgressStore.getState().hasHydrated) return;
 
-  const storageKey = `edenship-progress:${userId}`;
+  const storageKey = `ritmo-progress:${userId}`;
 
   useProgressStore.persist.setOptions({ storage: silentStorage });
   useProgressStore.setState({ ...createInitialSnapshot(), hasHydrated: false });
