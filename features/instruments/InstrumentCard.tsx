@@ -8,6 +8,8 @@ interface InstrumentCardProps {
   completedLessons: number;
   totalLessons: number;
   previewAvailable?: boolean;
+  /** Último instrumento abierto (preferencia local). */
+  isLastOpened?: boolean;
   onPress: () => void;
 }
 
@@ -16,6 +18,7 @@ export function InstrumentCard({
   completedLessons,
   totalLessons,
   previewAvailable = false,
+  isLastOpened = false,
   onPress,
 }: InstrumentCardProps) {
   const hasContent = totalLessons > 0;
@@ -46,6 +49,11 @@ export function InstrumentCard({
           <Text className="flex-1 text-lg font-extrabold text-ink">{instrument.name}</Text>
           <Text className="text-lg text-ink-muted">›</Text>
         </View>
+        {isLastOpened ? (
+          <Text className="mt-0.5 text-[11px] font-extrabold uppercase tracking-wide text-brand">
+            Continuar
+          </Text>
+        ) : null}
         <Text className="mt-0.5 text-xs leading-4 text-ink-muted" numberOfLines={2}>
           {instrument.tagline}
         </Text>

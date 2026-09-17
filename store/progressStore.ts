@@ -1,13 +1,7 @@
 /**
- * Estado persistente del alumno: XP, racha, vidas y progreso por lección.
- *
- * XP, racha, vidas, gemas, calendario de actividad (últimos 30 días) y
- * progreso por instrumento los calcula el backend (ver applyRemoteSummary,
- * GET /progress/me/summary); el store solo los refleja y los cachea
- * localmente para que la app tenga algo que mostrar al abrir sin red. Lo que
- * sigue siendo puramente local es el progreso por lección
- * (completed/bestScore/attempts) y el instrumento seleccionado
- * (lastInstrumentId): preferencia de UI, sin endpoint de backend.
+ * Estado persistente del alumno. XP, racha, vidas, gemas, calendario y
+ * progreso por instrumento vienen del backend (GET /progress/me/summary) y
+ * se cachean acá. Progreso por lección e instrumento seleccionado son locales.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMemo } from 'react';
@@ -34,11 +28,7 @@ function applyRemoteProgress(remote: ApiProgress): void {
   }));
 }
 
-/**
- * Aplica al store el resumen agregado de GET /progress/me/summary: xp/racha/
- * vidas (igual que applyRemoteProgress) más gemas, calendario de actividad
- * (últimos 30 días) y progreso por instrumento, todo en un solo request.
- */
+/** Aplica el resumen agregado de GET /progress/me/summary al store. */
 function applyRemoteSummary(remote: ApiProgressSummary): void {
   useProgressStore.setState((state) => ({
     xp: remote.xpTotal,
@@ -237,18 +227,9 @@ export const useProgressStore = create<ProgressStore>()(
 );
 
 /**
- * Cambia el namespace persistente antes de cargar el progreso. Durante el
- * cambio se usa un storage nulo para no sobrescribir los datos del otro alumno.
- *
- * El backend es la única fuente de verdad para xp/racha/vidas/gemas/
- * calendario de actividad/progreso por instrumento: en cada hidratación se
- * pisan con GET /progress/me/summary, sin importar si ya había un snapshot
- * local (uno viejo puede traer arrastrado XP/racha calculados localmente de
- * antes de que existiera el endpoint de escritura). Lo único que se
- * conserva del snapshot local es lo que el backend no modela: lecciones
- * completadas (para no bloquear el árbol offline), último instrumento y
- * premium. De ahí en adelante, xp/racha/vidas se mantienen al día llamando a
- * completeLesson en cada lección terminada (POST /progress/me/lessons/:id/complete).
+ * Cambia el namespace persistente y carga el progreso del usuario. Desbloquea
+ * la UI apenas hidrata el caché local; el refresco contra el backend sigue
+ * después, en segundo plano.
  */
 export async function hydrateProgressForUser(userId: string, token: string | null): Promise<void> {
   if (activeProgressUserId === userId && useProgressStore.getState().hasHydrated) return;
@@ -260,17 +241,14 @@ export async function hydrateProgressForUser(userId: string, token: string | nul
   useProgressStore.persist.setOptions({ name: storageKey, storage: progressStorage });
   activeProgressUserId = userId;
   await useProgressStore.persist.rehydrate();
+  useProgressStore.setState({ hasHydrated: true });
 
   if (token) {
     try {
       applyRemoteSummary(await fetchProgressSummary(token));
     } catch {
-      // Sin red o el backend no respondió: se sigue con los defaults/snapshot local.
+      // Sin red: se sigue con el snapshot local.
     }
-  }
-
-  if (!useProgressStore.getState().hasHydrated) {
-    useProgressStore.setState({ hasHydrated: true });
   }
 }
 

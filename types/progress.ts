@@ -40,19 +40,14 @@ export interface ProgressSnapshot {
   gems: number;
   hearts: HeartsState;
   streak: StreakState;
-  /**
-   * Días con al menos una lección completada, para el calendario del perfil.
-   * Se pisa con los últimos 30 días que informa el backend (GET
-   * /progress/me/summary); localmente se agrega el día de hoy de forma
-   * optimista al completar una lección, antes de confirmar contra el backend.
-   */
+  /** Días con actividad (últimos 30), para el calendario del perfil. Viene del backend. */
   practiceDays: DayKey[];
-  /** Total de lecciones completadas según el backend (todas las lecciones, no solo las cacheadas localmente). */
+  /** Total de lecciones completadas, según el backend. */
   totalLessonsCompleted: number;
-  /** Progreso por instrumento según el backend. */
+  /** Progreso por instrumento, según el backend. */
   progressByInstrument: InstrumentProgress[];
   lessons: Record<string, LessonProgress>;
-  /** Instrumento que el alumno tenía abierto: preferencia de UI, puramente local (sin endpoint de backend). */
+  /** Último instrumento abierto: preferencia local, sin backend. */
   lastInstrumentId: string | null;
   /** TODO(RevenueCat): lo poblará el listener de entitlements. */
   isPremium: boolean;

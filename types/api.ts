@@ -94,11 +94,7 @@ export interface ApiInstrumentProgress {
   totalLessons: number;
 }
 
-/**
- * Respuesta de GET /progress/me/summary: agrega en un solo request lo que la
- * pantalla de progreso necesita (xp/racha/vidas, calendario de actividad de
- * los últimos 30 días y progreso por instrumento) para evitar 3-4 llamadas.
- */
+/** Respuesta de GET /progress/me/summary: todo lo que necesita la pantalla de progreso en un solo request. */
 export interface ApiProgressSummary {
   xpTotal: number;
   currentStreak: number;

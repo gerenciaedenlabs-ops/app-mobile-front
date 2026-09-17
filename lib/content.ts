@@ -58,11 +58,7 @@ export function fetchLessonExercises(lessonId: string): Promise<ApiLessonWithExe
   return apiGet<ApiLessonWithExercises>(`lessons/${lessonId}/exercises`);
 }
 
-/**
- * Resumen agregado para la pantalla de progreso: xp/racha/vidas + calendario
- * de actividad (últimos 30 días, fijo) + progreso por instrumento, en un
- * solo request.
- */
+/** Resumen agregado para la pantalla de progreso, en un solo request. */
 export function fetchProgressSummary(token: string): Promise<ApiProgressSummary> {
   return apiGet<ApiProgressSummary>('progress/me/summary', { token });
 }

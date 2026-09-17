@@ -35,13 +35,10 @@ export default function ProfileScreen() {
   const remainingMs = useNextHeartCountdown();
   const heartsFull = hearts.current >= hearts.max;
 
-  // Solo para el ícono de cada instrumento; el progreso ya viene resuelto del backend.
+  // Solo para el ícono de cada instrumento.
   const instruments = useInstruments();
 
-  // El resumen puede haber quedado desactualizado desde la última vez que se
-  // sincronizó (al abrir la app o volver a foreground): refrescar cada vez
-  // que se entra a esta pantalla, para que XP/racha/lecciones/calendario
-  // reflejen lecciones completadas en la sesión de lección recién cerrada.
+  // Refresca cada vez que se abre esta pantalla, para no mostrar datos viejos.
   useFocusEffect(
     useCallback(() => {
       void refreshProgress(token);
