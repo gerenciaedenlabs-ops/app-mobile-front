@@ -86,3 +86,27 @@ export interface ApiCompleteLessonResponse {
   /** false si la lección ya se había completado antes (no se repite el XP, es idempotente). */
   xpAwarded: boolean;
 }
+
+export interface ApiInstrumentProgress {
+  instrumentId: string;
+  instrumentName: string;
+  completedLessons: number;
+  totalLessons: number;
+}
+
+/** Respuesta de GET /progress/me/summary: todo lo que necesita la pantalla de progreso en un solo request. */
+export interface ApiProgressSummary {
+  xpTotal: number;
+  currentStreak: number;
+  longestStreak: number;
+  lives: number;
+  maxLives: number;
+  livesRegenerateAt: string | null;
+  gems: number;
+  lastPracticeDate: string | null;
+  updatedAt: string;
+  totalLessonsCompleted: number;
+  /** "YYYY-MM-DD"[], últimos 30 días con al menos 1 lección completada. */
+  activeDates: string[];
+  progressByInstrument: ApiInstrumentProgress[];
+}

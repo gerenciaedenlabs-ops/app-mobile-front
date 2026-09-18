@@ -1,4 +1,5 @@
-import { type Href, useRouter } from 'expo-router';
+import { type Href, useFocusEffect, useRouter } from 'expo-router';
+import { useCallback } from 'react';
 import { Alert, Pressable, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
@@ -6,14 +7,13 @@ import { HeartsBar } from '@/components/HeartsBar';
 import { Screen } from '@/components/Screen';
 import { StatTile } from '@/features/profile/StatTile';
 import { StreakCalendar } from '@/features/profile/StreakCalendar';
-import { useCurriculaByInstrument, useInstruments } from '@/hooks/useContent';
+import { useInstruments } from '@/hooks/useContent';
 import { useNextHeartCountdown } from '@/hooks/useHearts';
 import { formatDuration, todayKey } from '@/lib/datetime';
-import { getEffectiveStreak, isStreakAtRisk } from '@/lib/streak';
-import { countCompleted } from '@/lib/unlock';
 import { presentCustomerCenter } from '@/lib/purchases';
+import { getEffectiveStreak, isStreakAtRisk } from '@/lib/streak';
 import { useAuthStore } from '@/store/authStore';
-import { useCompletedLessonIds, useProgressStore } from '@/store/progressStore';
+import { useProgressStore } from '@/store/progressStore';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -26,13 +26,24 @@ export default function ProfileScreen() {
   const hearts = useProgressStore((state) => state.hearts);
   const streak = useProgressStore((state) => state.streak);
   const practiceDays = useProgressStore((state) => state.practiceDays);
+  const totalLessonsCompleted = useProgressStore((state) => state.totalLessonsCompleted);
+  const progressByInstrument = useProgressStore((state) => state.progressByInstrument);
   const isPremium = useProgressStore((state) => state.isPremium);
   const resetProgress = useProgressStore((state) => state.resetProgress);
-  const completed = useCompletedLessonIds();
+  const refreshProgress = useProgressStore((state) => state.refreshProgress);
+  const token = useAuthStore((state) => state.token);
   const remainingMs = useNextHeartCountdown();
+  const heartsFull = hearts.current >= hearts.max;
 
+  // Solo para el ícono de cada instrumento.
   const instruments = useInstruments();
-  const curricula = useCurriculaByInstrument((instruments.data ?? []).map((instrument) => instrument.id));
+
+  // Refresca cada vez que se abre esta pantalla, para no mostrar datos viejos.
+  useFocusEffect(
+    useCallback(() => {
+      void refreshProgress(token);
+    }, [refreshProgress, token]),
+  );
 
   const today = todayKey();
   const currentStreak = getEffectiveStreak(streak, today);
@@ -107,16 +118,18 @@ export default function ProfileScreen() {
       <View className="mt-4 flex-row gap-3">
         <StatTile icon="🔥" value={currentStreak} label="Días de racha" />
         <StatTile icon="⚡" value={xp} label="XP total" />
-        <StatTile icon="🎓" value={completed.size} label="Lecciones" />
+        <StatTile icon="🎓" value={totalLessonsCompleted} label="Lecciones" />
       </View>
 
       <View className="mt-3 flex-row items-center justify-between rounded-2xl border border-slate-200 bg-white p-4">
         <View>
           <Text className="text-sm font-bold text-ink">Vidas</Text>
           <Text className="text-xs text-ink-muted">
-            {remainingMs === null
+            {heartsFull
               ? 'Todas disponibles'
-              : `Próxima en ${formatDuration(remainingMs)}`}
+              : remainingMs === null
+                ? 'Sincronizando…'
+                : `Próxima en ${formatDuration(remainingMs)}`}
           </Text>
         </View>
         <HeartsBar current={hearts.current} max={hearts.max} />
@@ -127,21 +140,20 @@ export default function ProfileScreen() {
 
       <Text className="mb-3 mt-6 text-lg font-extrabold text-ink">Por instrumento</Text>
       <View className="gap-2">
-        {(instruments.data ?? []).map((instrument) => {
-          const curriculum = curricula.data?.[instrument.id] ?? [];
-          const total = curriculum.reduce((sum, entry) => sum + entry.lessons.length, 0);
+        {progressByInstrument.map((entry) => {
+          const icon = instruments.data?.find((instrument) => instrument.id === entry.instrumentId)?.icon ?? '🎵';
 
           return (
             <View
-              key={instrument.id}
+              key={entry.instrumentId}
               className="flex-row items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3"
             >
-              <Text className="text-xl">{instrument.icon}</Text>
-              <Text className="flex-1 text-sm font-semibold text-ink">{instrument.name}</Text>
+              <Text className="text-xl">{icon}</Text>
+              <Text className="flex-1 text-sm font-semibold text-ink">{entry.instrumentName}</Text>
               <Text className="text-xs text-ink-muted">
-                {total === 0
+                {entry.totalLessons === 0
                   ? 'Próximamente'
-                  : `${countCompleted(curriculum, completed)}/${total} completadas`}
+                  : `${entry.completedLessons}/${entry.totalLessons} completadas`}
               </Text>
             </View>
           );

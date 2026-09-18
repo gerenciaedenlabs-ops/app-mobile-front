@@ -20,6 +20,7 @@ export default function InstrumentSelectorScreen() {
   const xp = useProgressStore((state) => state.xp);
   const hearts = useProgressStore((state) => state.hearts);
   const streak = useProgressStore((state) => state.streak);
+  const lastInstrumentId = useProgressStore((state) => state.lastInstrumentId);
   const setLastInstrument = useProgressStore((state) => state.setLastInstrument);
   const user = useAuthStore((state) => state.user);
   const completed = useCompletedLessonIds();
@@ -73,20 +74,24 @@ export default function InstrumentSelectorScreen() {
         />
       ) : (
         <View className="mt-4 gap-3">
-          {(instruments.data ?? []).map((instrument) => {
-            const curriculum = curricula.data?.[instrument.id] ?? [];
-            const totalLessons = curriculum.reduce((sum, entry) => sum + entry.lessons.length, 0);
+          {/* El último instrumento abierto va primero. */}
+          {[...(instruments.data ?? [])]
+            .sort((a, b) => Number(b.id === lastInstrumentId) - Number(a.id === lastInstrumentId))
+            .map((instrument) => {
+              const curriculum = curricula.data?.[instrument.id] ?? [];
+              const totalLessons = curriculum.reduce((sum, entry) => sum + entry.lessons.length, 0);
 
-            return (
-              <InstrumentCard
-                key={instrument.id}
-                instrument={instrument}
-                completedLessons={countCompleted(curriculum, completed)}
-                totalLessons={totalLessons}
-                onPress={() => openInstrument(instrument.id)}
-              />
-            );
-          })}
+              return (
+                <InstrumentCard
+                  key={instrument.id}
+                  instrument={instrument}
+                  completedLessons={countCompleted(curriculum, completed)}
+                  totalLessons={totalLessons}
+                  isLastOpened={instrument.id === lastInstrumentId}
+                  onPress={() => openInstrument(instrument.id)}
+                />
+              );
+            })}
         </View>
       )}
 
