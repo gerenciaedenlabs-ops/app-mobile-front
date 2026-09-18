@@ -82,6 +82,11 @@ export function formatMonthLabel(reference: Date = new Date()): string {
   return reference.toLocaleDateString('es', { month: 'long', year: 'numeric' });
 }
 
+/** ISO → "16 sep", para novedades y otras fechas cortas de UI. */
+export function formatShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('es', { day: 'numeric', month: 'short' }).replace('.', '');
+}
+
 /** "2h 15m", "45m", "30s" — para el contador de regeneración de vidas. */
 export function formatDuration(ms: number): string {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));

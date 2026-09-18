@@ -1,8 +1,9 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, type ReactNode } from 'react';
-import { Image, Pressable, Share, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, Share, Text, View } from 'react-native';
 
 import { AppHeader } from '@/components/AppHeader';
+import { EmptyState } from '@/components/EmptyState';
 import { Screen } from '@/components/Screen';
 import { TactileButton } from '@/components/TactileButton';
 import {
@@ -13,16 +14,46 @@ import {
   IconMusicNote,
   IconSettings,
   IconShare,
+  IconSignalOff,
+  IconTrophy,
 } from '@/components/icons';
 import { StreakCalendar } from '@/features/profile/StreakCalendar';
-import { useInstruments } from '@/hooks/useContent';
+import { useAchievements, useInstruments } from '@/hooks/useContent';
 import { useNextHeartCountdown } from '@/hooks/useHearts';
+import { cn } from '@/lib/cn';
 import { formatDuration, todayKey } from '@/lib/datetime';
 import { getEffectiveStreak } from '@/lib/streak';
 import { GAME_COLORS } from '@/lib/theme';
 import { useAuthStore } from '@/store/authStore';
 import { useProgressStore } from '@/store/progressStore';
 import { useThemeColors } from '@/store/themeStore';
+import type { ApiAchievement } from '@/types/api';
+
+function AchievementBadge({ achievement }: { achievement: ApiAchievement }) {
+  const colors = useThemeColors();
+  return (
+    <View className={cn('w-[92px] items-center gap-1.5 rounded-2xl border border-line bg-surface p-3', !achievement.unlocked && 'opacity-40')}>
+      <View
+        className="h-11 w-11 items-center justify-center rounded-full"
+        style={{ backgroundColor: achievement.unlocked ? '#FFF7D6' : colors.surfaceRaised }}
+      >
+        {achievement.iconUrl ? (
+          <Image
+            source={{ uri: achievement.iconUrl }}
+            accessibilityIgnoresInvertColors
+            style={{ width: 24, height: 24 }}
+            resizeMode="contain"
+          />
+        ) : (
+          <IconTrophy size={20} color={achievement.unlocked ? '#EAB308' : colors.inkMuted} filled={achievement.unlocked} />
+        )}
+      </View>
+      <Text numberOfLines={2} className="text-center text-[11px] font-bold text-ink">
+        {achievement.name}
+      </Text>
+    </View>
+  );
+}
 
 function StatCard({ icon, iconBg, value, label }: { icon: ReactNode; iconBg: string; value: string; label: string }) {
   return (
@@ -59,6 +90,7 @@ export default function ProfileScreen() {
   // Para el ícono de cada instrumento y el selector de la cabecera.
   const instruments = useInstruments();
   const currentInstrument = instruments.data?.find((instrument) => instrument.id === lastInstrumentId);
+  const achievements = useAchievements();
 
   // Refresca cada vez que se abre esta pantalla, para no mostrar datos viejos.
   useFocusEffect(
@@ -227,6 +259,33 @@ export default function ProfileScreen() {
               </View>
             );
           })}
+        </View>
+
+        {/* Logros */}
+        <View className="gap-2.5">
+          <Text className="px-1 text-base font-bold text-ink">Logros</Text>
+
+          {achievements.status === 'loading' ? (
+            <ActivityIndicator color={colors.brand} />
+          ) : achievements.status === 'error' ? (
+            <EmptyState
+              icon={<IconSignalOff size={32} color={colors.inkMuted} />}
+              title="No se pudieron cargar los logros"
+              description={achievements.error?.message ?? 'Revisa tu conexión e inténtalo de nuevo.'}
+            />
+          ) : (achievements.data ?? []).length === 0 ? (
+            <EmptyState
+              icon={<IconTrophy size={32} color={colors.inkMuted} />}
+              title="Sin logros todavía"
+              description="Completa lecciones y misiones para desbloquear logros."
+            />
+          ) : (
+            <View className="flex-row flex-wrap gap-2.5">
+              {(achievements.data ?? []).map((achievement) => (
+                <AchievementBadge key={achievement.id} achievement={achievement} />
+              ))}
+            </View>
+          )}
         </View>
 
         <TactileButton
