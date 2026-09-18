@@ -41,11 +41,11 @@ export default function GuitarTunerScreen() {
   return (
     <Screen scroll>
       <DevelopmentHeader title="Detector de guitarra" subtitle="Notas individuales en tiempo real" />
-      <View className="mt-6 rounded-3xl bg-white p-6">
+      <View className="mt-6 rounded-3xl bg-surface p-6">
         <AudioLevelBar level={inputLevel} />
         <View className="mt-7 items-center">
           <Text className="text-xs font-bold uppercase tracking-widest text-ink-muted">Nota detectada</Text>
-          <Text className="mt-2 text-6xl font-black text-violet-700">
+          <Text className="mt-2 text-6xl font-black text-violet-700 dark:text-violet-300">
             {detector.pitch ? NOTE_NAMES[detector.pitch.noteName] ?? detector.pitch.noteName : '—'}
           </Text>
           <Text className="mt-1 text-xl font-bold text-ink">

@@ -14,8 +14,10 @@ import { getEffectiveStreak } from '@/lib/streak';
 import { buildTree } from '@/lib/unlock';
 import { useCompletedLessonIds, useProgressStore } from '@/store/progressStore';
 import type { Lesson } from '@/types/content';
+import { useThemeColors } from '@/store/themeStore';
 
 export default function SkillTreeScreen() {
+  const colors = useThemeColors();
   const router = useRouter();
   const { instrumentId } = useLocalSearchParams<{ instrumentId: string }>();
 
@@ -38,7 +40,7 @@ export default function SkillTreeScreen() {
     return (
       <Screen>
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#6D28D9" />
+          <ActivityIndicator size="large" color={colors.brand} />
         </View>
       </Screen>
     );
@@ -96,13 +98,13 @@ export default function SkillTreeScreen() {
 
   return (
     <Screen scroll>
-      <View className="flex-row items-center justify-between border-b border-slate-200 pb-4 pt-2">
+      <View className="flex-row items-center justify-between border-b border-line pb-4 pt-2">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Volver a los instrumentos"
           onPress={() => router.back()}
           hitSlop={12}
-          className="h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white active:bg-slate-200"
+          className="h-10 w-10 items-center justify-center rounded-full border border-line bg-surface active:bg-surface-raised"
         >
           <Text className="text-xl text-ink-muted">‹</Text>
         </Pressable>
@@ -118,7 +120,7 @@ export default function SkillTreeScreen() {
         accessibilityRole="button"
         accessibilityLabel="Cambiar curso"
         onPress={() => router.back()}
-        className="mb-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 active:bg-surface-sunken"
+        className="mb-5 mt-4 flex-row items-center gap-3 rounded-2xl border border-line bg-surface p-3 active:bg-surface-sunken"
       >
         <View
           style={{ backgroundColor: `${instrument.accentColor}1A` }}
@@ -136,7 +138,7 @@ export default function SkillTreeScreen() {
 
       {curriculumState.status === 'loading' ? (
         <View className="items-center py-12">
-          <ActivityIndicator size="large" color="#6D28D9" />
+          <ActivityIndicator size="large" color={colors.brand} />
         </View>
       ) : curriculumState.status === 'error' ? (
         <EmptyState

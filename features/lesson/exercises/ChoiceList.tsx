@@ -31,17 +31,17 @@ export function ChoiceList({ choices, selectedId, correctChoiceId, revealed, onS
             disabled={revealed}
             onPress={() => onSelect(choice.id)}
             className={cn(
-              'min-h-[56px] justify-center rounded-xl border-2 bg-white px-4 py-3',
+              'min-h-[56px] justify-center rounded-xl border-2 bg-surface px-4 py-3',
               !revealed && isSelected && 'border-brand bg-brand-soft',
-              !revealed && !isSelected && 'border-slate-200 active:bg-surface-sunken',
+              !revealed && !isSelected && 'border-line active:bg-surface-sunken',
               showAsCorrect && 'border-success bg-success-soft',
               showAsWrong && 'border-danger bg-danger-soft',
-              revealed && !showAsCorrect && !showAsWrong && 'border-slate-200 opacity-60',
+              revealed && !showAsCorrect && !showAsWrong && 'border-line opacity-60',
             )}
           >
             <View className="flex-row items-center justify-between gap-3">
-              <View className={cn('h-7 w-7 items-center justify-center rounded-md border', isSelected ? 'border-brand' : 'border-slate-200')}>
-                <Text className={cn('text-xs font-bold', isSelected ? 'text-brand' : 'text-ink-muted')}>
+              <View className={cn('h-7 w-7 items-center justify-center rounded-md border', isSelected ? 'border-brand' : 'border-line')}>
+                <Text className={cn('text-xs font-bold', isSelected ? 'text-brand-ink' : 'text-ink-muted')}>
                   {choices.indexOf(choice) + 1}
                 </Text>
               </View>

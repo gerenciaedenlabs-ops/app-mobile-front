@@ -111,12 +111,12 @@ export default function VoiceTunerScreen() {
           accessibilityRole="button"
           accessibilityLabel="Volver"
           onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center rounded-full bg-white active:bg-slate-200"
+          className="h-10 w-10 items-center justify-center rounded-full bg-surface active:bg-surface-raised"
         >
           <Text className="text-2xl text-ink">‹</Text>
         </Pressable>
-        <View className="rounded-full bg-cyan-100 px-3 py-1">
-          <Text className="text-xs font-extrabold text-cyan-700">DEBUG · AFINADOR LIBRE</Text>
+        <View className="rounded-full bg-cyan-100 dark:bg-cyan-900 px-3 py-1">
+          <Text className="text-xs font-extrabold text-cyan-700 dark:text-cyan-300">DEBUG · AFINADOR LIBRE</Text>
         </View>
       </View>
 
@@ -140,7 +140,7 @@ export default function VoiceTunerScreen() {
               onPress={() => setSelectedNote(note)}
               className={cn(
                 'min-w-[52px] items-center rounded-xl border-2 px-3 py-2.5',
-                selected ? 'border-cyan-600 bg-cyan-600' : 'border-slate-200 bg-white',
+                selected ? 'border-cyan-600 bg-cyan-600' : 'border-line bg-surface',
               )}
             >
               <Text className={cn('text-sm font-extrabold', selected ? 'text-white' : 'text-ink')}>
@@ -164,7 +164,7 @@ export default function VoiceTunerScreen() {
               onPress={() => setSelectedOctave(octave)}
               className={cn(
                 'h-11 flex-1 items-center justify-center rounded-xl border-2',
-                selected ? 'border-cyan-600 bg-cyan-600' : 'border-slate-200 bg-white',
+                selected ? 'border-cyan-600 bg-cyan-600' : 'border-line bg-surface',
               )}
             >
               <Text className={cn('font-extrabold', selected ? 'text-white' : 'text-ink')}>{octave}</Text>
@@ -175,16 +175,16 @@ export default function VoiceTunerScreen() {
 
       <MicrophoneLevel level={microphoneLevel} active={listening && detector.status === 'listening'} />
 
-      <View className="mt-4 rounded-3xl bg-white p-5">
+      <View className="mt-4 rounded-3xl bg-surface p-5">
         <View className="items-center">
           <Text className="text-xs font-bold uppercase tracking-wider text-ink-muted">Frecuencia en vivo</Text>
           <TextInput
             ref={frequencyRef}
             editable={false}
             defaultValue="--.-"
-            className="mt-1 p-0 text-center text-5xl font-extrabold tabular-nums text-cyan-700"
+            className="mt-1 p-0 text-center text-5xl font-extrabold tabular-nums text-cyan-700 dark:text-cyan-300"
           />
-          <Text className="text-base font-bold text-cyan-700">Hz</Text>
+          <Text className="text-base font-bold text-cyan-700 dark:text-cyan-300">Hz</Text>
           <TextInput
             ref={detectedNoteRef}
             editable={false}

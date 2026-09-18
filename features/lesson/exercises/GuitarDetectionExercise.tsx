@@ -17,11 +17,11 @@ function ChordDiagram({ target }: { target: ChordTarget }) {
       {target.diagram.map((position, index) => (
         <View key={index} className="flex-row items-center gap-3">
           <Text className="w-10 text-xs font-semibold text-ink-muted">{6 - index}ª</Text>
-          <View className="h-0.5 flex-1 bg-slate-300" />
+          <View className="h-0.5 flex-1 bg-surface-raised" />
           <View
             className={cn(
               'h-7 w-7 items-center justify-center rounded-full',
-              position === 'x' ? 'bg-slate-200' : position === 0 ? 'bg-white border-2 border-ink' : 'bg-ink',
+              position === 'x' ? 'bg-line' : position === 0 ? 'bg-surface border-2 border-ink' : 'bg-ink',
             )}
           >
             <Text
@@ -89,7 +89,7 @@ export function GuitarDetectionExercise({
       <Text className="mt-4 text-2xl font-extrabold leading-8 text-ink">{exercise.prompt}</Text>
       {exercise.hint ? <Text className="mt-2 text-sm text-ink-muted">{exercise.hint}</Text> : null}
 
-      <View className="mt-6 items-center rounded-2xl border border-slate-200 bg-white p-5">
+      <View className="mt-6 items-center rounded-2xl border border-line bg-surface p-5">
         <Text className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Objetivo</Text>
         <Text className="mt-1 text-5xl font-extrabold text-ink">{targetLabel}</Text>
 
@@ -111,9 +111,9 @@ export function GuitarDetectionExercise({
         {listening ? (
           <>
             {/* Afinador: la marca central es la nota afinada. */}
-            <View className="h-16 justify-center rounded-2xl border border-slate-200 bg-white px-4">
-              <View className="h-1 w-full rounded-full bg-slate-200" />
-              <View className="absolute left-1/2 h-10 w-0.5 bg-slate-300" />
+            <View className="h-16 justify-center rounded-2xl border border-line bg-surface px-4">
+              <View className="h-1 w-full rounded-full bg-line" />
+              <View className="absolute left-1/2 h-10 w-0.5 bg-surface-raised" />
               <View
                 style={{ left: `${50 + needleOffset * 45}%` }}
                 className={cn(
@@ -176,3 +176,4 @@ export function GuitarDetectionExercise({
     </View>
   );
 }
+

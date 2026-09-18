@@ -1,7 +1,9 @@
 import { Pressable, Text, View } from 'react-native';
 
 import { ProgressBar } from '@/components/ProgressBar';
+import { IconChevronRight } from '@/components/icons';
 import type { Instrument } from '@/types/content';
+import { useThemeColors } from '@/store/themeStore';
 
 interface InstrumentCardProps {
   instrument: Instrument;
@@ -21,6 +23,7 @@ export function InstrumentCard({
   isLastOpened = false,
   onPress,
 }: InstrumentCardProps) {
+  const colors = useThemeColors();
   const hasContent = totalLessons > 0;
   const progress = hasContent ? completedLessons / totalLessons : 0;
 
@@ -35,7 +38,7 @@ export function InstrumentCard({
             : 'Próximamente'
       }`}
       onPress={onPress}
-      className="w-full flex-row items-center gap-4 rounded-2xl border-2 border-slate-200 bg-white p-4 active:bg-surface-sunken"
+      className="w-full flex-row items-center gap-4 rounded-2xl border-2 border-line bg-surface p-4 active:bg-surface-sunken"
     >
       <View
         style={{ backgroundColor: `${instrument.accentColor}1A` }}
@@ -47,10 +50,10 @@ export function InstrumentCard({
       <View className="min-w-0 flex-1">
         <View className="flex-row items-center justify-between gap-2">
           <Text className="flex-1 text-lg font-extrabold text-ink">{instrument.name}</Text>
-          <Text className="text-lg text-ink-muted">›</Text>
+          <IconChevronRight size={18} color={colors.inkMuted} />
         </View>
         {isLastOpened ? (
-          <Text className="mt-0.5 text-[11px] font-extrabold uppercase tracking-wide text-brand">
+          <Text className="mt-0.5 text-[11px] font-extrabold uppercase tracking-wide text-brand-ink">
             Continuar
           </Text>
         ) : null}
@@ -72,7 +75,7 @@ export function InstrumentCard({
             </Text>
           </>
         ) : previewAvailable ? (
-          <Text className="text-[11px] font-extrabold uppercase tracking-wide text-cyan-700">
+          <Text className="text-[11px] font-extrabold uppercase tracking-wide text-cyan-700 dark:text-cyan-300">
             Prueba disponible
           </Text>
         ) : (

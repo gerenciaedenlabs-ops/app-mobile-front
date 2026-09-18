@@ -1,3 +1,64 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Temas de Ritmo. Cada color es un triplete RGB para que Tailwind pueda aplicar
+ * opacidad (`bg-brand/20`). `:root` es el tema claro y `.dark:root` el oscuro;
+ * se alternan en ejecución con `colorScheme.set()` desde store/themeStore.ts.
+ * Si cambias un valor aquí, refléjalo en lib/theme.ts (colores usados desde JS).
+ */
+:root {
+  /* Tema claro: sistema "Gamified Music Learning System" (Diseno Nuevo/). */
+  --color-ink: 27 28 28;
+  --color-ink-soft: 63 74 54;
+  --color-ink-muted: 111 123 100;
+
+  --color-surface: 255 255 255;
+  --color-surface-sunken: 251 249 248;
+  --color-surface-raised: 234 232 231;
+
+  --color-line: 234 232 231;
+  --color-line-strong: 219 217 217;
+
+  --color-brand: 88 204 2;
+  --color-brand-soft: 238 250 230;
+  --color-brand-strong: 70 163 2;
+  --color-brand-ink: 43 108 0;
+
+  --color-success: 88 204 2;
+  --color-success-soft: 215 255 184;
+  --color-danger: 220 38 38;
+  --color-danger-soft: 255 218 214;
+  --color-warning: 217 119 6;
+  --color-warning-soft: 255 246 216;
+
+  --color-streak: 255 150 0;
+}
+
+.dark:root {
+  --color-ink: 244 244 245;
+  --color-ink-soft: 212 212 216;
+  --color-ink-muted: 161 161 170;
+
+  --color-surface: 38 39 44;
+  --color-surface-sunken: 24 25 29;
+  --color-surface-raised: 48 50 56;
+
+  --color-line: 57 59 66;
+  --color-line-strong: 74 77 85;
+
+  --color-brand: 139 92 246;
+  --color-brand-soft: 45 37 69;
+  --color-brand-strong: 109 40 217;
+  --color-brand-ink: 167 139 250;
+
+  --color-success: 34 197 94;
+  --color-success-soft: 22 48 31;
+  --color-danger: 239 68 68;
+  --color-danger-soft: 58 29 31;
+  --color-warning: 245 158 11;
+  --color-warning-soft: 58 44 18;
+
+  --color-streak: 249 115 22;
+}

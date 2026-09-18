@@ -1,3 +1,21 @@
+/** Color que sale de una variable de tema de global.css y admite opacidad. */
+const themeColor = (name) => `rgb(var(--color-${name}) / <alpha-value>)`;
+
+/**
+ * Nunito Sans (diseño "Gamified Music Learning System"). En React Native cada
+ * peso es una fuente distinta cargada con expo-font en app/_layout.tsx, así que
+ * las clases de peso (`font-bold`, `font-extrabold`…) eligen la familia en vez
+ * de fijar `fontWeight`, que con fuentes personalizadas no selecciona variante.
+ */
+const FONT_BY_WEIGHT = {
+  normal: 'NunitoSans_400Regular',
+  medium: 'NunitoSans_500Medium',
+  semibold: 'NunitoSans_600SemiBold',
+  bold: 'NunitoSans_700Bold',
+  extrabold: 'NunitoSans_800ExtraBold',
+  black: 'NunitoSans_900Black',
+};
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   // Evita que NativeWind intente controlar manualmente un esquema ligado a
@@ -9,43 +27,71 @@ module.exports = {
     './features/**/*.{js,jsx,ts,tsx}',
   ],
   presets: [require('nativewind/preset')],
+  // Sustituido por el plugin de abajo, que mapea cada peso a su fuente.
+  corePlugins: { fontWeight: false },
   theme: {
     extend: {
       colors: {
-        // Paleta base de Ritmo. Los acentos por instrumento viven en content/instruments.json.
+        // Paleta base de Ritmo. Los valores viven como variables CSS en
+        // global.css (tema claro en `:root`, oscuro en `.dark:root`), así que el
+        // cambio de tema no obliga a tocar pantallas. Los acentos por instrumento
+        // viven en content/instruments.json.
         ink: {
-          DEFAULT: '#0F172A',
-          soft: '#334155',
-          muted: '#64748B',
+          DEFAULT: themeColor('ink'),
+          soft: themeColor('ink-soft'),
+          muted: themeColor('ink-muted'),
         },
         surface: {
-          DEFAULT: '#FFFFFF',
-          sunken: '#F1F5F9',
-          raised: '#F8FAFC',
+          // Tarjetas y barras.
+          DEFAULT: themeColor('surface'),
+          // Fondo de la app.
+          sunken: themeColor('surface-sunken'),
+          // Estados pulsados y elementos bloqueados.
+          raised: themeColor('surface-raised'),
+        },
+        // Bordes y divisores.
+        line: {
+          DEFAULT: themeColor('line'),
+          strong: themeColor('line-strong'),
         },
         brand: {
-          DEFAULT: '#6D28D9',
-          soft: '#EDE9FE',
-          strong: '#5B21B6',
+          // Relleno de botones y elementos destacados.
+          DEFAULT: themeColor('brand'),
+          soft: themeColor('brand-soft'),
+          // "Labio" 3D inferior de botones y nodos.
+          strong: themeColor('brand-strong'),
+          // Texto en color de marca (el relleno no siempre tiene contraste).
+          ink: themeColor('brand-ink'),
         },
         success: {
-          DEFAULT: '#16A34A',
-          soft: '#DCFCE7',
+          DEFAULT: themeColor('success'),
+          soft: themeColor('success-soft'),
         },
         danger: {
-          DEFAULT: '#DC2626',
-          soft: '#FEE2E2',
+          DEFAULT: themeColor('danger'),
+          soft: themeColor('danger-soft'),
         },
         warning: {
-          DEFAULT: '#D97706',
-          soft: '#FEF3C7',
+          DEFAULT: themeColor('warning'),
+          soft: themeColor('warning-soft'),
         },
-        streak: '#F97316',
+        streak: themeColor('streak'),
       },
       borderRadius: {
         xl2: '20px',
       },
     },
   },
-  plugins: [],
+  plugins: [
+    ({ addUtilities }) => {
+      addUtilities(
+        Object.fromEntries(
+          Object.entries(FONT_BY_WEIGHT).map(([weight, family]) => [
+            `.font-${weight}`,
+            { fontFamily: family },
+          ]),
+        ),
+      );
+    },
+  ],
 };

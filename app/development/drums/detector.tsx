@@ -21,12 +21,12 @@ export default function DrumDetectorScreen() {
   return (
     <Screen scroll>
       <DevelopmentHeader title="Detector de batería" subtitle="Bombo, caja, hi-hat y tempo" />
-      <View className="mt-6 rounded-3xl bg-white p-6">
+      <View className="mt-6 rounded-3xl bg-surface p-6">
         <AudioLevelBar level={detector.inputLevel} />
         <View className="mt-7 items-center">
           <Text className="text-xs font-bold uppercase tracking-widest text-ink-muted">Último golpe</Text>
           <Text className="mt-3 text-6xl">{detector.latestHit ? DRUM_ICONS[detector.latestHit.type] : '🥁'}</Text>
-          <Text className="mt-2 text-4xl font-black text-orange-700">
+          <Text className="mt-2 text-4xl font-black text-orange-700 dark:text-orange-300">
             {detector.latestHit ? DRUM_LABELS[detector.latestHit.type] : '—'}
           </Text>
           <Text className="mt-2 text-sm font-semibold text-ink-muted">
@@ -62,7 +62,7 @@ export default function DrumDetectorScreen() {
         {detector.history.length === 0 ? (
           <Text className="text-sm text-ink-muted">Todavía no hay golpes detectados.</Text>
         ) : detector.history.map((hit) => (
-          <View key={hit.id} className="rounded-full bg-white px-3 py-2">
+          <View key={hit.id} className="rounded-full bg-surface px-3 py-2">
             <Text className="text-xs font-bold text-ink">{DRUM_ICONS[hit.type]} {DRUM_LABELS[hit.type]}</Text>
           </View>
         ))}

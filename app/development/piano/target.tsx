@@ -58,15 +58,15 @@ export default function PianoTargetScreen() {
             key={key.id}
             disabled={enabled}
             onPress={() => setSelectedId(key.id)}
-            className={`rounded-full border-2 px-3 py-2 ${selectedId === key.id ? 'border-blue-600 bg-blue-100' : 'border-slate-200 bg-white'}`}
+            className={`rounded-full border-2 px-3 py-2 ${selectedId === key.id ? 'border-blue-600 bg-blue-100 dark:bg-blue-900' : 'border-line bg-surface'}`}
           >
             <Text className="text-xs font-extrabold text-ink">{key.label}</Text>
           </Pressable>
         ))}
       </View>
-      <View className="mt-5 rounded-3xl bg-white p-6">
+      <View className="mt-5 rounded-3xl bg-surface p-6">
         <Text className="text-center text-sm font-bold uppercase tracking-wider text-ink-muted">Objetivo</Text>
-        <Text className="mt-2 text-center text-5xl font-black text-blue-700">{target.label}</Text>
+        <Text className="mt-2 text-center text-5xl font-black text-blue-700 dark:text-blue-300">{target.label}</Text>
         <Text className="mt-1 text-center text-sm text-ink-muted">{target.frequencyHz.toFixed(2)} Hz · tolerancia ±25 cents</Text>
         <View className="mt-6"><AudioLevelBar level={inputLevel} /></View>
         <Text className="mt-6 text-center text-3xl font-extrabold text-ink">{detector.pitch?.label ?? '—'}</Text>
@@ -80,7 +80,7 @@ export default function PianoTargetScreen() {
           <Text className="mt-2 text-center text-xs text-ink-muted">Mantén la nota durante 1,2 segundos</Text>
         </View>
         {result ? (
-          <View className={`mt-5 rounded-2xl p-4 ${result.correct ? 'bg-success-soft' : 'bg-red-50'}`}>
+          <View className={`mt-5 rounded-2xl p-4 ${result.correct ? 'bg-success-soft' : 'bg-red-50 dark:bg-red-950'}`}>
             <Text className={`text-center text-lg font-extrabold ${result.correct ? 'text-success' : 'text-danger'}`}>
               {result.correct ? '✅ NOTA SUPERADA' : '❌ INTÉNTALO DE NUEVO'}
             </Text>

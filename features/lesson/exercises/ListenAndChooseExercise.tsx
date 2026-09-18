@@ -100,8 +100,11 @@ export function ListenAndChooseExercise({
       </View>
 
       {!revealed ? (
-        <Button label="Comprobar" onPress={check} disabled={selectedId === null} className="mt-4" />
+        <View className="-mx-5 -mb-8 mt-4 border-t border-line bg-surface px-5 pb-8 pt-4">
+          <Button label="Comprobar" onPress={check} disabled={selectedId === null} className="mt-4" />
+        </View>
       ) : null}
     </View>
   );
 }
+

@@ -33,7 +33,7 @@ export default function VoiceDevelopmentMenuScreen() {
           accessibilityRole="button"
           accessibilityLabel="Volver"
           onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center rounded-full bg-white active:bg-slate-200"
+          className="h-10 w-10 items-center justify-center rounded-full bg-surface active:bg-surface-raised"
         >
           <Text className="text-2xl text-ink">‹</Text>
         </Pressable>
@@ -55,14 +55,14 @@ export default function VoiceDevelopmentMenuScreen() {
             accessibilityRole="button"
             accessibilityLabel={test.title}
             onPress={() => router.push(test.route)}
-            className="rounded-3xl border-2 border-slate-200 bg-white p-5 active:bg-surface-sunken"
+            className="rounded-3xl border-2 border-line bg-surface p-5 active:bg-surface-sunken"
           >
-            <View className="h-14 w-14 items-center justify-center rounded-2xl bg-cyan-100">
+            <View className="h-14 w-14 items-center justify-center rounded-2xl bg-cyan-100 dark:bg-cyan-900">
               <Text className="text-3xl">{test.icon}</Text>
             </View>
             <Text className="mt-4 text-xl font-extrabold text-ink">{test.title}</Text>
             <Text className="mt-1 text-sm leading-5 text-ink-muted">{test.description}</Text>
-            <Text className="mt-4 text-sm font-extrabold text-cyan-700">ABRIR PRUEBA →</Text>
+            <Text className="mt-4 text-sm font-extrabold text-cyan-700 dark:text-cyan-300">ABRIR PRUEBA →</Text>
           </Pressable>
         ))}
       </View>
