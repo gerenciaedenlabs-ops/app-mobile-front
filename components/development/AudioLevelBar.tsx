@@ -12,7 +12,7 @@ export function AudioLevelBar({ level }: AudioLevelBarProps) {
         <Text className="text-xs font-bold uppercase tracking-wider text-ink-muted">Entrada</Text>
         <Text className="text-xs font-bold text-ink-muted">{percent}%</Text>
       </View>
-      <View className="mt-2 h-3 overflow-hidden rounded-full bg-slate-200">
+      <View className="mt-2 h-3 overflow-hidden rounded-full bg-line">
         <View className="h-full rounded-full bg-cyan-500" style={{ width: `${percent}%` }} />
       </View>
     </View>

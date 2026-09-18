@@ -10,7 +10,7 @@ interface CardProps {
 
 export function Card({ children, className }: CardProps) {
   return (
-    <View className={cn('rounded-2xl border border-slate-200 bg-white p-4', className)}>
+    <View className={cn('rounded-2xl border border-line bg-surface p-4', className)}>
       {children}
     </View>
   );

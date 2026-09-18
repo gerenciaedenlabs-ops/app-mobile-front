@@ -2,6 +2,7 @@ import { Redirect } from 'expo-router';
 
 import { DevelopmentTestMenu } from '@/components/development/DevelopmentTestMenu';
 import { DEVELOPMENT_SECTION_ENABLED } from '@/lib/development';
+import { useThemeStore } from '@/store/themeStore';
 
 const TESTS = [
   {
@@ -21,12 +22,13 @@ const TESTS = [
 ];
 
 export default function PianoDevelopmentMenuScreen() {
+  const darkMode = useThemeStore((state) => state.darkMode);
   if (!DEVELOPMENT_SECTION_ENABLED) return <Redirect href="/" />;
   return (
     <DevelopmentTestMenu
       title="Motor de Piano"
       description="Afinación monofónica y reconocimiento espectral de hasta cuatro notas simultáneas."
-      accentColor="#DBEAFE"
+      accentColor={darkMode ? '#1E2A40' : '#DBEAFE'}
       tests={TESTS}
     />
   );

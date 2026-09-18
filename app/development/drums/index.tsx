@@ -2,6 +2,7 @@ import { Redirect } from 'expo-router';
 
 import { DevelopmentTestMenu } from '@/components/development/DevelopmentTestMenu';
 import { DEVELOPMENT_SECTION_ENABLED } from '@/lib/development';
+import { useThemeStore } from '@/store/themeStore';
 
 const TESTS = [
   {
@@ -21,12 +22,13 @@ const TESTS = [
 ];
 
 export default function DrumsDevelopmentMenuScreen() {
+  const darkMode = useThemeStore((state) => state.darkMode);
   if (!DEVELOPMENT_SECTION_ENABLED) return <Redirect href="/" />;
   return (
     <DevelopmentTestMenu
       title="Motor de Batería"
       description="Detección de ataques, clasificación tímbrica inicial y análisis temporal local."
-      accentColor="#FFEDD5"
+      accentColor={darkMode ? '#3B2314' : '#FFEDD5'}
       tests={TESTS}
     />
   );

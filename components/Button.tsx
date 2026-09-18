@@ -20,7 +20,7 @@ interface ButtonProps {
 
 const CONTAINER: Record<ButtonVariant, string> = {
   primary: 'bg-brand active:bg-brand-strong',
-  secondary: 'bg-white border-2 border-slate-200 active:bg-surface-sunken',
+  secondary: 'bg-surface border-2 border-line active:bg-surface-sunken',
   success: 'bg-success active:opacity-90',
   danger: 'bg-danger active:opacity-90',
   ghost: 'bg-transparent active:bg-surface-sunken',
@@ -57,7 +57,7 @@ export function Button({
         size === 'lg' ? 'min-h-[56px] px-6 py-4' : 'min-h-[44px] px-4 py-2.5',
         CONTAINER[variant],
         variant === 'primary' && 'border-brand-strong',
-        variant === 'secondary' && 'border-slate-300',
+        variant === 'secondary' && 'border-line-strong',
         variant === 'success' && 'border-green-700',
         variant === 'danger' && 'border-red-700',
         variant === 'ghost' && 'border-transparent',
