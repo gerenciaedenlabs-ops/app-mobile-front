@@ -59,15 +59,15 @@ export default function GuitarTargetScreen() {
             key={item.id}
             disabled={enabled}
             onPress={() => setSelectedId(item.id)}
-            className={`rounded-full border-2 px-3 py-2 ${selectedId === item.id ? 'border-violet-600 bg-violet-100' : 'border-slate-200 bg-white'}`}
+            className={`rounded-full border-2 px-3 py-2 ${selectedId === item.id ? 'border-violet-600 bg-violet-100 dark:bg-violet-900' : 'border-line bg-surface'}`}
           >
             <Text className="text-xs font-extrabold text-ink">{item.label}</Text>
           </Pressable>
         ))}
       </View>
-      <View className="mt-5 rounded-3xl bg-white p-6">
+      <View className="mt-5 rounded-3xl bg-surface p-6">
         <Text className="text-center text-sm font-bold uppercase tracking-wider text-ink-muted">Objetivo</Text>
-        <Text className="mt-2 text-center text-5xl font-black text-violet-700">{target.label}</Text>
+        <Text className="mt-2 text-center text-5xl font-black text-violet-700 dark:text-violet-300">{target.label}</Text>
         <Text className="mt-1 text-center text-sm text-ink-muted">{target.frequencyHz.toFixed(2)} Hz · tolerancia ±25 cents</Text>
         <View className="mt-6"><AudioLevelBar level={inputLevel} /></View>
         <Text className="mt-6 text-center text-3xl font-extrabold text-ink">
@@ -81,7 +81,7 @@ export default function GuitarTargetScreen() {
           <Text className="mt-2 text-center text-xs text-ink-muted">Mantén la nota durante 1,5 segundos</Text>
         </View>
         {result ? (
-          <View className={`mt-5 rounded-2xl p-4 ${result.correct ? 'bg-success-soft' : 'bg-red-50'}`}>
+          <View className={`mt-5 rounded-2xl p-4 ${result.correct ? 'bg-success-soft' : 'bg-red-50 dark:bg-red-950'}`}>
             <Text className={`text-center text-lg font-extrabold ${result.correct ? 'text-success' : 'text-danger'}`}>
               {result.correct ? '✅ NOTA SUPERADA' : '❌ INTÉNTALO DE NUEVO'}
             </Text>

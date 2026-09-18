@@ -12,11 +12,13 @@ import { useLessonExercises } from '@/hooks/useContent';
 import { formatDuration } from '@/lib/datetime';
 import { useProgressStore } from '@/store/progressStore';
 import type { Lesson } from '@/types/content';
+import { useThemeColors } from '@/store/themeStore';
 
 /** Cuando se entra por deep link sin pasar por el árbol y no se conoce el xpReward real. */
 const FALLBACK_XP_REWARD = 10;
 
 export default function LessonScreen() {
+  const colors = useThemeColors();
   const router = useRouter();
   const { lessonId, instrumentId, xpReward } = useLocalSearchParams<{
     lessonId: string;
@@ -59,7 +61,7 @@ export default function LessonScreen() {
     return (
       <Screen>
         <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#6D28D9" />
+          <ActivityIndicator size="large" color={colors.brand} />
         </View>
       </Screen>
     );

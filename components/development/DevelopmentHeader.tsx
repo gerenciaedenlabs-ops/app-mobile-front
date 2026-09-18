@@ -14,7 +14,7 @@ export function DevelopmentHeader({ title, subtitle }: DevelopmentHeaderProps) {
         accessibilityRole="button"
         accessibilityLabel="Volver"
         onPress={() => router.back()}
-        className="h-10 w-10 items-center justify-center rounded-full bg-white active:bg-slate-200"
+        className="h-10 w-10 items-center justify-center rounded-full bg-surface active:bg-surface-raised"
       >
         <Text className="text-2xl text-ink">‹</Text>
       </Pressable>

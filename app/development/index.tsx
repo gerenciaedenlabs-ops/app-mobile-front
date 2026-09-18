@@ -34,7 +34,7 @@ export default function DevelopmentMenuScreen() {
           accessibilityRole="button"
           accessibilityLabel="Volver"
           onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center rounded-full bg-white active:bg-slate-200"
+          className="h-10 w-10 items-center justify-center rounded-full bg-surface active:bg-surface-raised"
         >
           <Text className="text-2xl text-ink">‹</Text>
         </Pressable>
@@ -61,7 +61,7 @@ export default function DevelopmentMenuScreen() {
               accessibilityState={{ disabled: !available }}
               disabled={!available}
               onPress={() => route && router.push(route as Href)}
-              className="flex-row items-center gap-4 rounded-2xl border-2 border-slate-200 bg-white p-4 active:bg-surface-sunken disabled:opacity-50"
+              className="flex-row items-center gap-4 rounded-2xl border-2 border-line bg-surface p-4 active:bg-surface-sunken disabled:opacity-50"
             >
               <View
                 style={{ backgroundColor: `${instrument.accentColor}1A` }}
@@ -73,7 +73,7 @@ export default function DevelopmentMenuScreen() {
                 <Text className="text-lg font-extrabold text-ink">{instrument.name}</Text>
                 <Text className="mt-0.5 text-xs text-ink-muted">{instrument.tagline}</Text>
               </View>
-              <View className={available ? 'rounded-full bg-success-soft px-3 py-1' : 'rounded-full bg-slate-100 px-3 py-1'}>
+              <View className={available ? 'rounded-full bg-success-soft px-3 py-1' : 'rounded-full bg-surface-raised px-3 py-1'}>
                 <Text className={available ? 'text-xs font-bold text-success' : 'text-xs font-bold text-ink-muted'}>
                   {available ? 'LISTO' : 'PENDIENTE'}
                 </Text>

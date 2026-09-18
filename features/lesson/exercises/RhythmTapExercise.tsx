@@ -83,7 +83,7 @@ export function RhythmTapExercise({
             <View
               key={beat}
               className={cn(
-                'h-10 flex-1 min-w-[36px] items-center justify-center rounded-xl border-2 border-slate-200 bg-white',
+                'h-10 flex-1 min-w-[36px] items-center justify-center rounded-xl border-2 border-line bg-surface',
                 isCurrent && 'border-brand bg-brand-soft',
                 match && match.score >= 0.6 && 'border-success bg-success-soft',
                 match && match.score > 0 && match.score < 0.6 && 'border-warning bg-warning-soft',
@@ -105,14 +105,14 @@ export function RhythmTapExercise({
         onPressIn={handleTap}
         disabled={!metronome.isRunning}
         className={cn(
-          'mt-6 flex-1 items-center justify-center rounded-3xl border-4 border-dashed border-slate-300 bg-white',
+          'mt-6 flex-1 items-center justify-center rounded-3xl border-4 border-dashed border-line-strong bg-surface',
           metronome.isRunning && 'border-solid border-brand bg-brand-soft',
           !metronome.isRunning && 'opacity-70',
         )}
       >
         {metronome.isCountingIn && metronome.isRunning ? (
           <>
-            <Text className="text-6xl font-extrabold text-brand">
+            <Text className="text-6xl font-extrabold text-brand-ink">
               {exercise.countInBeats + metronome.beat + 1}
             </Text>
             <Text className="mt-2 text-sm text-ink-muted">Preparando…</Text>
@@ -120,7 +120,7 @@ export function RhythmTapExercise({
         ) : metronome.isRunning ? (
           <>
             <Text className="text-6xl">👆</Text>
-            <Text className="mt-2 text-sm font-semibold text-brand">
+            <Text className="mt-2 text-sm font-semibold text-brand-ink">
               Pulso {metronome.beat + 1} · {tapCount} toques
             </Text>
           </>
@@ -145,13 +145,15 @@ export function RhythmTapExercise({
       </Pressable>
 
       {!revealed && !metronome.isRunning ? (
-        <Button
-          label={evaluation ? 'Reintentar' : 'Empezar'}
-          onPress={start}
-          className="mt-4"
-          icon="▶️"
-        />
+        <View className="-mx-5 -mb-8 mt-4 border-t border-line bg-surface px-5 pb-8 pt-4">
+          <Button
+            label={evaluation ? 'Reintentar' : 'Empezar'}
+            onPress={start}
+            icon="▶️"
+          />
+        </View>
       ) : null}
     </View>
   );
 }
+

@@ -96,14 +96,14 @@ export default function DrumRhythmScreen() {
   return (
     <Screen scroll>
       <DevelopmentHeader title="Secuencia rítmica" subtitle="Patrón de 4 golpes · 90 BPM" />
-      <View className="mt-6 rounded-3xl bg-white p-6">
+      <View className="mt-6 rounded-3xl bg-surface p-6">
         <AudioLevelBar level={detector.inputLevel} />
         <Text className="mt-6 text-center text-sm font-bold uppercase tracking-wider text-ink-muted">Secuencia</Text>
         <View className="mt-4 flex-row justify-center gap-2">
           {PATTERN.map((type, index) => (
             <View
               key={`${type}-${index}`}
-              className={`h-16 w-16 items-center justify-center rounded-2xl border-2 ${index < step ? 'border-success bg-success-soft' : index === step && enabled ? 'border-orange-500 bg-orange-100' : 'border-slate-200 bg-surface-sunken'}`}
+              className={`h-16 w-16 items-center justify-center rounded-2xl border-2 ${index < step ? 'border-success bg-success-soft' : index === step && enabled ? 'border-orange-500 bg-orange-100 dark:bg-orange-900' : 'border-line bg-surface-sunken'}`}
             >
               <Text className="text-2xl">{ICONS[type]}</Text>
               <Text className="mt-1 text-[10px] font-extrabold text-ink">{DRUM_LABELS[type]}</Text>

@@ -24,7 +24,7 @@ export default function PianoDetectorScreen() {
   return (
     <Screen scroll>
       <DevelopmentHeader title="Detector de piano" subtitle="Notas y acordes en tiempo real" />
-      <View className="mt-6 rounded-3xl bg-white p-6">
+      <View className="mt-6 rounded-3xl bg-surface p-6">
         <AudioLevelBar level={inputLevel} />
         <Text className="mt-7 text-center text-xs font-bold uppercase tracking-widest text-ink-muted">
           {detector.notes.length > 1 ? 'Notas detectadas' : 'Nota detectada'}
@@ -32,11 +32,11 @@ export default function PianoDetectorScreen() {
         {detector.notes.length > 0 ? (
           <View className="mt-4 flex-row flex-wrap justify-center gap-3">
             {detector.notes.map((note) => (
-              <View key={note.midi} className="min-w-[92px] rounded-2xl bg-blue-50 px-4 py-3">
-                <Text className="text-center text-3xl font-black text-blue-700">{NOTE_NAMES[note.name] ?? note.name}</Text>
+              <View key={note.midi} className="min-w-[92px] rounded-2xl bg-blue-50 dark:bg-blue-950 px-4 py-3">
+                <Text className="text-center text-3xl font-black text-blue-700 dark:text-blue-300">{NOTE_NAMES[note.name] ?? note.name}</Text>
                 <Text className="mt-1 text-center text-base font-extrabold text-ink">{note.label}</Text>
                 <Text className="mt-1 text-center text-xs text-ink-muted">{note.frequencyHz.toFixed(1)} Hz</Text>
-                <Text className="mt-1 text-center text-[10px] font-bold text-blue-600">{Math.round(note.confidence * 100)}%</Text>
+                <Text className="mt-1 text-center text-[10px] font-bold text-blue-700 dark:text-blue-300">{Math.round(note.confidence * 100)}%</Text>
               </View>
             ))}
           </View>

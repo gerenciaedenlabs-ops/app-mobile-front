@@ -22,6 +22,7 @@ export default function LessonResultScreen() {
 
   const hearts = useProgressStore((state) => state.hearts);
   const streak = useProgressStore((state) => state.streak);
+  const setLastInstrument = useProgressStore((state) => state.setLastInstrument);
 
   const passed = params.outcome === 'passed';
   const xpEarned = Number(params.xp ?? 0);
@@ -32,8 +33,12 @@ export default function LessonResultScreen() {
   const currentStreak = getEffectiveStreak(streak, today);
 
   const goToTree = () => {
-    if (params.instrumentId) router.replace(`/learn/${params.instrumentId}`);
-    else router.replace('/');
+    // Volvemos a Ruta (dentro de las pestañas) y no a la pantalla antigua
+    // `learn/[instrumentId]`, que no tiene barra inferior ni botón de volver.
+    if (params.instrumentId) {
+      setLastInstrument(params.instrumentId);
+      router.replace('/(tabs)/ruta');
+    } else router.replace('/');
   };
 
   return (
@@ -55,7 +60,7 @@ export default function LessonResultScreen() {
           <StatTile icon="🔥" value={currentStreak} label="Racha" />
         </View>
 
-        <View className="mt-3 w-full flex-row items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+        <View className="mt-3 w-full flex-row items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3">
           <View>
             <Text className="text-sm font-bold text-ink">Vidas restantes</Text>
             <Text className="text-xs text-ink-muted">

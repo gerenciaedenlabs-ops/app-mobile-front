@@ -1,8 +1,17 @@
+import {
+  NunitoSans_400Regular,
+  NunitoSans_500Medium,
+  NunitoSans_600SemiBold,
+  NunitoSans_700Bold,
+  NunitoSans_800ExtraBold,
+  NunitoSans_900Black,
+  useFonts,
+} from '@expo-google-fonts/nunito-sans';
 import { type Href, Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { setAudioModeAsync } from 'expo-audio';
 import { useEffect } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Image, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -14,6 +23,7 @@ import {
   unloadProgressUser,
   useProgressStore,
 } from '@/store/progressStore';
+import { useThemeColors, useThemeStore } from '@/store/themeStore';
 
 import '../global.css';
 
@@ -25,6 +35,20 @@ export default function RootLayout() {
   const user = useAuthStore((state) => state.user);
   const token = useAuthStore((state) => state.token);
   const hasHydrated = useProgressStore((state) => state.hasHydrated);
+  const darkMode = useThemeStore((state) => state.darkMode);
+  const colors = useThemeColors();
+  // Las clases `font-*` apuntan a estas familias (ver tailwind.config.js). En
+  // iOS usar una familia no cargada rompe el render, así que esperamos a que
+  // estén listas; si fallaran, seguimos para no bloquear la app.
+  const [fontsLoaded, fontError] = useFonts({
+    NunitoSans_400Regular,
+    NunitoSans_500Medium,
+    NunitoSans_600SemiBold,
+    NunitoSans_700Bold,
+    NunitoSans_800ExtraBold,
+    NunitoSans_900Black,
+  });
+  const fontsReady = fontsLoaded || fontError !== null;
 
   // Pone al día los corazones al abrir y al volver a primer plano.
   useHeartsSync();
@@ -37,7 +61,8 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (!authHasHydrated) return;
+    // El Stack no se monta hasta tener fuentes: sin él no se puede navegar.
+    if (!authHasHydrated || !fontsReady) return;
     let cancelled = false;
 
     // Sincroniza usuario con RevenueCat
@@ -56,7 +81,7 @@ export default function RootLayout() {
     return () => {
       cancelled = true;
     };
-  }, [authHasHydrated, user, token, router, currentSegment]);
+  }, [authHasHydrated, fontsReady, user, token, router, currentSegment]);
 
   // TODO(OneSignal): inicializar el SDK aquí y pedir permiso de notificaciones
   // tras la primera lección completada, no en el arranque en frío.
@@ -64,9 +89,9 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <StatusBar style="dark" />
-        {authHasHydrated && (!user || hasHydrated) ? (
-          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#F1F5F9' } }}>
+        <StatusBar style={darkMode ? 'light' : 'dark'} />
+        {fontsReady && authHasHydrated && (!user || hasHydrated) ? (
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.surfaceSunken } }}>
             <Stack.Screen name="login" options={{ gestureEnabled: false }} />
             <Stack.Screen name="index" />
             <Stack.Screen name="learn/[instrumentId]" />
@@ -85,12 +110,18 @@ export default function RootLayout() {
             <Stack.Screen name="development/piano/index" />
             <Stack.Screen name="development/piano/target" options={{ gestureEnabled: false }} />
             <Stack.Screen name="development/piano/detector" options={{ gestureEnabled: false }} />
-            <Stack.Screen name="profile" options={{ presentation: 'modal' }} />
             <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="settings" options={{ presentation: 'modal' }} />
           </Stack>
         ) : (
           <View className="flex-1 items-center justify-center bg-surface-sunken">
-            <ActivityIndicator size="large" color="#6D28D9" />
+            <Image
+              source={require('@/assets/brand/app-icon.png')}
+              accessibilityLabel="Ritmo"
+              style={{ width: 112, height: 109 }}
+              resizeMode="contain"
+            />
+            <ActivityIndicator size="large" color={colors.brand} style={{ marginTop: 32 }} />
           </View>
         )}
       </SafeAreaProvider>

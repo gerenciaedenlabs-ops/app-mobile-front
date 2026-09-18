@@ -24,12 +24,12 @@ export default function VoiceLevelTestScreen() {
           accessibilityRole="button"
           accessibilityLabel="Volver"
           onPress={() => router.back()}
-          className="h-10 w-10 items-center justify-center rounded-full bg-white active:bg-slate-200"
+          className="h-10 w-10 items-center justify-center rounded-full bg-surface active:bg-surface-raised"
         >
           <Text className="text-2xl text-ink">‹</Text>
         </Pressable>
-        <View className="rounded-full bg-cyan-100 px-3 py-1">
-          <Text className="text-xs font-extrabold text-cyan-700">DEBUG · PRUEBA DE NIVEL</Text>
+        <View className="rounded-full bg-cyan-100 dark:bg-cyan-900 px-3 py-1">
+          <Text className="text-xs font-extrabold text-cyan-700 dark:text-cyan-300">DEBUG · PRUEBA DE NIVEL</Text>
         </View>
       </View>
 

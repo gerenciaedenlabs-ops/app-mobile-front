@@ -1,9 +1,10 @@
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Text, TextInput, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { IconEye, IconEyeOff } from '@/components/icons';
 import { Screen } from '@/components/Screen';
 import GoogleIcon from '@/assets/icon/google-icon.svg';
 import { ApiError } from '@/lib/api';
@@ -21,6 +22,7 @@ const missingGoogleClientId = 'google-oauth-not-configured.apps.googleuserconten
 export default function LoginScreen() {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [showEmailLogin, setShowEmailLogin] = useState(false);
   const [isOpeningGoogle, setIsOpeningGoogle] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -108,16 +110,26 @@ export default function LoginScreen() {
         className="flex-1 justify-center py-8"
       >
         <View className="items-center">
-          <View className="h-20 w-20 items-center justify-center rounded-3xl bg-brand-soft">
-            <Text className="text-4xl">🎵</Text>
-          </View>
-          <Text className="mt-5 text-4xl font-extrabold text-ink">Ritmo</Text>
-          <Text className="mt-2 text-center text-sm text-ink-muted">
+          <Image
+            source={require('@/assets/brand/mascot.png')}
+            accessibilityIgnoresInvertColors
+            style={{ width: 150, height: 152 }}
+            resizeMode="contain"
+          />
+          <Image
+            source={require('@/assets/brand/wordmark.png')}
+            accessibilityRole="header"
+            accessibilityLabel="Ritmo"
+            style={{ width: 200, height: 98 }}
+            resizeMode="contain"
+            className="mt-1"
+          />
+          <Text className="mt-1 text-center text-sm text-ink-muted">
             Aprende música, una lección a la vez.
           </Text>
         </View>
 
-        <View className="mt-8 rounded-3xl bg-white p-5">
+        <View className="mt-8 rounded-3xl bg-surface p-5">
           <Text className="text-2xl font-extrabold text-ink">Iniciar sesión / Registrarse</Text>
           <Text className="mt-1 text-sm text-ink-muted">Continúa con tu cuenta de Google o tu correo electrónico.</Text>
 
@@ -132,9 +144,9 @@ export default function LoginScreen() {
           />
 
           <View className="my-5 flex-row items-center gap-3">
-            <View className="h-px flex-1 bg-slate-200" />
+            <View className="h-px flex-1 bg-line" />
             <Text className="text-xs font-semibold uppercase tracking-wider text-ink-muted">o</Text>
-            <View className="h-px flex-1 bg-slate-200" />
+            <View className="h-px flex-1 bg-line" />
           </View>
 
           <Button
@@ -162,23 +174,36 @@ export default function LoginScreen() {
                 textContentType="username"
                 returnKeyType="next"
                 placeholder="deymer o deymer@ritmo.test"
-                className="h-14 rounded-2xl border-2 border-slate-200 bg-surface-sunken px-4 text-base text-ink"
+                className="h-14 rounded-2xl border-2 border-line bg-surface-sunken px-4 text-base text-ink"
               />
 
               <Text className="mb-2 mt-4 text-xs font-bold uppercase tracking-wider text-ink-muted">
                 Contraseña
               </Text>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                editable={!busy}
-                secureTextEntry
-                textContentType="password"
-                returnKeyType="done"
-                onSubmitEditing={() => void submitEmailLogin()}
-                placeholder="Tu contraseña"
-                className="h-14 rounded-2xl border-2 border-slate-200 bg-surface-sunken px-4 text-base text-ink"
-              />
+              <View className="h-14 flex-row items-center rounded-2xl border-2 border-line bg-surface-sunken">
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  editable={!busy}
+                  secureTextEntry={!showPassword}
+                  textContentType="password"
+                  returnKeyType="done"
+                  onSubmitEditing={() => void submitEmailLogin()}
+                  placeholder="Tu contraseña"
+                  className="flex-1 px-4 text-base text-ink"
+                />
+                <Pressable
+                  onPress={() => setShowPassword((v) => !v)}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  hitSlop={8}
+                  className="px-4 py-3"
+                >
+                  {showPassword
+                    ? <IconEyeOff size={20} color="#94A3B8" />
+                    : <IconEye size={20} color="#94A3B8" />}
+                </Pressable>
+              </View>
 
               <Button
                 label={isLoggingIn ? 'Iniciando…' : 'Entrar con correo'}

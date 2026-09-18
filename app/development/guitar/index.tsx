@@ -2,6 +2,7 @@ import { Redirect } from 'expo-router';
 
 import { DevelopmentTestMenu } from '@/components/development/DevelopmentTestMenu';
 import { DEVELOPMENT_SECTION_ENABLED } from '@/lib/development';
+import { useThemeStore } from '@/store/themeStore';
 
 const TESTS = [
   {
@@ -21,12 +22,13 @@ const TESTS = [
 ];
 
 export default function GuitarDevelopmentMenuScreen() {
+  const darkMode = useThemeStore((state) => state.darkMode);
   if (!DEVELOPMENT_SECTION_ENABLED) return <Redirect href="/" />;
   return (
     <DevelopmentTestMenu
       title="Motor de Guitarra"
       description="Detección monofónica en tiempo real para afinar y validar cuerdas individuales."
-      accentColor="#EDE9FE"
+      accentColor={darkMode ? '#2D2545' : '#EDE9FE'}
       tests={TESTS}
     />
   );

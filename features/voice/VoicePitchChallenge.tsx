@@ -60,17 +60,17 @@ export function MicrophoneLevel({ level, active }: { level: Animated.Value; acti
         />
         <View
           className={cn(
-            'h-14 w-14 items-center justify-center rounded-full border-2 bg-white',
-            active ? 'border-cyan-500' : 'border-slate-200',
+            'h-14 w-14 items-center justify-center rounded-full border-2 bg-surface',
+            active ? 'border-cyan-500' : 'border-line',
           )}
         >
           <Text className="text-2xl">🎤</Text>
         </View>
       </View>
-      <View className="h-1.5 w-28 overflow-hidden rounded-full bg-slate-200">
+      <View className="h-1.5 w-28 overflow-hidden rounded-full bg-line">
         <Animated.View
           style={{ transform: [{ scaleX: active ? barScale : 0.04 }] }}
-          className={cn('h-full w-full rounded-full', active ? 'bg-cyan-500' : 'bg-slate-300')}
+          className={cn('h-full w-full rounded-full', active ? 'bg-cyan-500' : 'bg-surface-raised')}
         />
       </View>
     </View>
@@ -117,8 +117,8 @@ export function TunerNeedle({
       onLayout={(event) => setTrackWidth(event.nativeEvent.layout.width)}
       className="h-14 justify-center rounded-2xl bg-surface-sunken px-4"
     >
-      <View className="h-1 w-full rounded-full bg-slate-200" />
-      <View className="absolute left-1/2 h-9 w-0.5 bg-slate-400" />
+      <View className="h-1 w-full rounded-full bg-line" />
+      <View className="absolute left-1/2 h-9 w-0.5 bg-line-strong" />
       <Animated.View
         style={{
           left: '50%',
@@ -248,11 +248,11 @@ export function VoicePitchChallenge({
 
       <MicrophoneLevel level={microphoneLevel} active={isListening && detector.status === 'listening'} />
 
-      <View className="mt-4 rounded-3xl bg-white p-4">
+      <View className="mt-4 rounded-3xl bg-surface p-4">
         <View className="flex-row gap-3">
           <View className="flex-1 rounded-2xl bg-surface-sunken p-3">
             <Text className="text-xs font-bold uppercase tracking-wider text-ink-muted">Objetivo</Text>
-            <Text className="mt-1 text-3xl font-extrabold text-cyan-700">{displayName}</Text>
+            <Text className="mt-1 text-3xl font-extrabold text-cyan-700 dark:text-cyan-300">{displayName}</Text>
             <Text className="mt-1 text-xs text-ink-muted">
               {formatNote(target.name, target.octave)} · {target.frequencyHz.toFixed(1)} Hz
             </Text>
@@ -269,7 +269,7 @@ export function VoicePitchChallenge({
               ref={frequencyRef}
               editable={false}
               defaultValue="--.- Hz"
-              className="mt-1 p-0 text-2xl font-extrabold tabular-nums text-cyan-700"
+              className="mt-1 p-0 text-2xl font-extrabold tabular-nums text-cyan-700 dark:text-cyan-300"
             />
           </View>
         </View>
@@ -296,7 +296,7 @@ export function VoicePitchChallenge({
         </View>
 
         <View className="mt-5">
-          <View className="h-3 w-full overflow-hidden rounded-full bg-slate-200">
+          <View className="h-3 w-full overflow-hidden rounded-full bg-line">
             <Animated.View
               style={{ width: liveProgress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }}
               className="h-full rounded-full bg-cyan-600"
@@ -314,7 +314,7 @@ export function VoicePitchChallenge({
         </View>
       </View>
 
-      <View className="mt-4 min-h-[92px] items-center justify-center rounded-3xl bg-white p-4">
+      <View className="mt-4 min-h-[92px] items-center justify-center rounded-3xl bg-surface p-4">
         {challengeState === 'completed' ? (
           <>
             <Text className={cn('text-lg font-extrabold', finalEvaluation?.correct ? 'text-success' : 'text-danger')}>
