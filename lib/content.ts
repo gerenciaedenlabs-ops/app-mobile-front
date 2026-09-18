@@ -16,6 +16,7 @@ import type {
   ApiLesson,
   ApiLessonWithExercises,
   ApiProgress,
+  ApiProgressSummary,
   ApiUnit,
 } from '@/types/api';
 import type { Instrument, Lesson, Unit, UnitWithLessons } from '@/types/content';
@@ -57,8 +58,9 @@ export function fetchLessonExercises(lessonId: string): Promise<ApiLessonWithExe
   return apiGet<ApiLessonWithExercises>(`lessons/${lessonId}/exercises`);
 }
 
-export function fetchProgress(token: string): Promise<ApiProgress> {
-  return apiGet<ApiProgress>('progress/me', { token });
+/** Resumen agregado para la pantalla de progreso, en un solo request. */
+export function fetchProgressSummary(token: string): Promise<ApiProgressSummary> {
+  return apiGet<ApiProgressSummary>('progress/me/summary', { token });
 }
 
 /**

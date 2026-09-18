@@ -28,13 +28,26 @@ export interface StreakState {
   lastPracticeDay: DayKey | null;
 }
 
+export interface InstrumentProgress {
+  instrumentId: string;
+  instrumentName: string;
+  completedLessons: number;
+  totalLessons: number;
+}
+
 export interface ProgressSnapshot {
   xp: number;
+  gems: number;
   hearts: HeartsState;
   streak: StreakState;
-  /** Días con al menos una lección completada, para el calendario del perfil. */
+  /** Días con actividad (últimos 30), para el calendario del perfil. Viene del backend. */
   practiceDays: DayKey[];
+  /** Total de lecciones completadas, según el backend. */
+  totalLessonsCompleted: number;
+  /** Progreso por instrumento, según el backend. */
+  progressByInstrument: InstrumentProgress[];
   lessons: Record<string, LessonProgress>;
+  /** Último instrumento abierto: preferencia local, sin backend. */
   lastInstrumentId: string | null;
   /** TODO(RevenueCat): lo poblará el listener de entitlements. */
   isPremium: boolean;
