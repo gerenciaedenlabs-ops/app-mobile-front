@@ -75,11 +75,14 @@ export default function TabsLayout() {
         }}
       />
       {/*
-        Ligas y Novedades no están en el diseño nuevo. Se conservan las pantallas
-        pero `href: null` las saca de la barra.
+        Ligas, Novedades, Clanes y Tienda no están en el diseño nuevo (Daniel
+        no definió dónde entran en la IA todavía). Se conservan las pantallas
+        pero `href: null` las saca de la barra hasta que se decida.
       */}
       <Tabs.Screen name="leagues" options={{ href: null, title: 'Ligas' }} />
       <Tabs.Screen name="news" options={{ href: null, title: 'Novedades' }} />
+      <Tabs.Screen name="clubs" options={{ href: null, title: 'Clanes' }} />
+      <Tabs.Screen name="shop" options={{ href: null, title: 'Tienda' }} />
     </Tabs>
   );
 }

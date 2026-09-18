@@ -6,8 +6,31 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { ApiError } from '@/lib/api';
-import { fetchCurriculum, fetchInstruments, fetchLessonExercises } from '@/lib/content';
-import type { ApiLessonWithExercises } from '@/types/api';
+import {
+  fetchAchievements,
+  fetchClub,
+  fetchClubs,
+  fetchCurriculum,
+  fetchInstruments,
+  fetchLeague,
+  fetchLessonExercises,
+  fetchMissions,
+  fetchNews,
+  fetchShopInventory,
+  fetchShopItems,
+} from '@/lib/content';
+import { useAuthStore } from '@/store/authStore';
+import type {
+  ApiAchievement,
+  ApiClub,
+  ApiClubDetail,
+  ApiInventoryItem,
+  ApiLeagueMe,
+  ApiLessonWithExercises,
+  ApiMission,
+  ApiNewsItem,
+  ApiShopItem,
+} from '@/types/api';
 import type { Instrument, UnitWithLessons } from '@/types/content';
 
 export interface FetchState<T> {
@@ -93,4 +116,45 @@ export function useLessonExercises(lessonId: string | undefined): FetchState<Api
     if (!lessonId) return Promise.reject(new ApiError('Falta el id de la lección.', 0));
     return fetchLessonExercises(lessonId);
   }, [lessonId]);
+}
+
+/** Misiones diarias + reto mensual. Sin sesión no hay a quién pedírselas: lista vacía. */
+export function useMissions(): FetchState<ApiMission[]> {
+  const token = useAuthStore((state) => state.token);
+  return useFetchState(() => (token ? fetchMissions(token) : Promise.resolve([])), [token]);
+}
+
+/** Liga y ranking semanal. null es un estado válido: "no hay temporada activa". */
+export function useLeague(): FetchState<ApiLeagueMe | null> {
+  const token = useAuthStore((state) => state.token);
+  return useFetchState(() => (token ? fetchLeague(token) : Promise.resolve(null)), [token]);
+}
+
+export function useClubs(): FetchState<ApiClub[]> {
+  return useFetchState(fetchClubs, []);
+}
+
+export function useClub(clubId: string | undefined): FetchState<ApiClubDetail> {
+  return useFetchState(() => {
+    if (!clubId) return Promise.reject(new ApiError('Falta el id del clan.', 0));
+    return fetchClub(clubId);
+  }, [clubId]);
+}
+
+export function useAchievements(): FetchState<ApiAchievement[]> {
+  const token = useAuthStore((state) => state.token);
+  return useFetchState(() => (token ? fetchAchievements(token) : Promise.resolve([])), [token]);
+}
+
+export function useShopItems(): FetchState<ApiShopItem[]> {
+  return useFetchState(fetchShopItems, []);
+}
+
+export function useShopInventory(): FetchState<ApiInventoryItem[]> {
+  const token = useAuthStore((state) => state.token);
+  return useFetchState(() => (token ? fetchShopInventory(token) : Promise.resolve([])), [token]);
+}
+
+export function useNews(): FetchState<ApiNewsItem[]> {
+  return useFetchState(fetchNews, []);
 }
