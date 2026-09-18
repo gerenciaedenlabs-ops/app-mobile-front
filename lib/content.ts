@@ -7,16 +7,24 @@
  * que el resto de la app pueda seguir navegando Instrument → Unit → Lesson
  * como hasta ahora.
  */
-import { apiGet, apiPost } from './api';
+import { ApiError, apiGet, apiPost } from './api';
 import { getInstrumentPresentation } from './instrumentPresentation';
 
 import type {
+  ApiAchievement,
+  ApiClub,
+  ApiClubDetail,
   ApiCompleteLessonResponse,
   ApiInstrument,
+  ApiInventoryItem,
+  ApiLeagueMe,
   ApiLesson,
   ApiLessonWithExercises,
+  ApiMission,
+  ApiNewsItem,
   ApiProgress,
   ApiProgressSummary,
+  ApiShopItem,
   ApiUnit,
 } from '@/types/api';
 import type { Instrument, Lesson, Unit, UnitWithLessons } from '@/types/content';
@@ -82,4 +90,47 @@ export function completeLessonProgress(
  */
 export function loseLifeProgress(token: string): Promise<ApiProgress> {
   return apiPost<ApiProgress>('progress/me/lives/lose', { token });
+}
+
+/** Misiones diarias + reto mensual del usuario. Requiere sesión. */
+export function fetchMissions(token: string): Promise<ApiMission[]> {
+  return apiGet<ApiMission[]>('missions/me', { token });
+}
+
+/**
+ * Liga y ranking semanal del usuario. null si no hay temporada activa (404):
+ * es un estado esperado, no un error de red — "todavía no hay liga", igual
+ * que un instrumento sin unidades sembradas.
+ */
+export async function fetchLeague(token: string): Promise<ApiLeagueMe | null> {
+  try {
+    return await apiGet<ApiLeagueMe>('leagues/me', { token });
+  } catch (cause) {
+    if (cause instanceof ApiError && cause.status === 404) return null;
+    throw cause;
+  }
+}
+
+export function fetchClubs(): Promise<ApiClub[]> {
+  return apiGet<ApiClub[]>('clubs');
+}
+
+export function fetchClub(clubId: string): Promise<ApiClubDetail> {
+  return apiGet<ApiClubDetail>(`clubs/${clubId}`);
+}
+
+export function fetchAchievements(token: string): Promise<ApiAchievement[]> {
+  return apiGet<ApiAchievement[]>('achievements/me', { token });
+}
+
+export function fetchShopItems(): Promise<ApiShopItem[]> {
+  return apiGet<ApiShopItem[]>('shop/items');
+}
+
+export function fetchShopInventory(token: string): Promise<ApiInventoryItem[]> {
+  return apiGet<ApiInventoryItem[]>('shop/me/inventory', { token });
+}
+
+export function fetchNews(): Promise<ApiNewsItem[]> {
+  return apiGet<ApiNewsItem[]>('news');
 }
